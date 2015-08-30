@@ -3,6 +3,10 @@ name = "exefmt"
 version = "0.1.0"
 authors = ["monocasa"]
 
+[lib]
+name="exefmt"
+path = "src/lib.rs"
+
 [dependencies]
 nom = "*"
 

@@ -1,8 +1,4 @@
-extern crate nom;
-
-enum EntryPoint
-
 pub trait Loader {
-	
+	fn entry_point(&self) -> u64;
 }
 
