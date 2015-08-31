@@ -137,15 +137,6 @@ impl From<byteorder::Error> for ElfParseError {
 	}
 }
 
-//impl From<byteorder::new::Error> for ElfParseError {
-//	fn from(err: byteorder::new::Error) -> ElfParseError {
-//		match err {
-//			byteorder::new::Error::Io(err) => { ElfParseError::Io(err) }
-//			byteorder::new::Error::UnexpectedEOF => { ElfParseError::UnexpectedEOF }
-//		}
-//	}
-//}
-
 #[derive(Default)]
 pub struct ElfFile {
 	pub e_ident: [u8; EI_NIDENT],
