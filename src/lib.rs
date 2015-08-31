@@ -1,3 +1,3 @@
-pub mod elffile;
+pub mod elf;
 pub mod loader;
 
