@@ -292,7 +292,7 @@ pub fn ehdr_data_string(e_data: u8) -> String {
 
 pub fn ehdr_osabi_string(e_osabi: u8) -> String {
 	match e_osabi {
-		ELFOSABI_SYSV => "Unix - System V".to_string(),
+		ELFOSABI_SYSV => "UNIX - System V".to_string(),
 		
 		_ => format!("Unknown ELF OS/ABI {:#x}", e_osabi),
 	}
