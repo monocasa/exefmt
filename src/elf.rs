@@ -31,7 +31,34 @@ pub const ELFDATA2MSB: u8 = 2;
 pub const EI_VERSION: usize = 6;
 pub const EV_CURRENT: u8 = 1;
 
+pub const EI_OSABI: usize = 7;
+pub const ELFOSABI_NONE: u8       = 0;
+pub const ELFOSABI_SYSV: u8       = 0;
+pub const ELFOSABI_HPUX: u8       = 1;
+pub const ELFOSABI_NETBSD: u8     = 2;
+pub const ELFOSABI_GNU: u8        = 3;
+pub const ELFOSABI_LINUX: u8      = ELFOSABI_GNU;
+pub const ELFOSABI_SOLARIS: u8    = 6;
+pub const ELFOSABI_AIX: u8        = 7;
+pub const ELFOSABI_IRIX: u8       = 8;
+pub const ELFOSABI_FREEBSD: u8    = 9;
+pub const ELFOSABI_TRU64: u8      = 10;
+pub const ELFOSABI_MODESTO: u8    = 11;
+pub const ELFOSABI_OPENBSD: u8    = 12;
+pub const ELFOSABI_ARM_AEABI: u8  = 64;
+pub const ELFOSABI_ARM: u8        = 97;
+pub const ELFOSABI_STANDALONE: u8 = 255;
+
 pub const EI_NIDENT: usize = 16;
+
+pub const ET_NONE: u16  = 0;
+pub const ET_REL: u16   = 1;
+pub const ET_EXEC: u16  = 2;
+pub const ET_DYN: u16   = 3;
+pub const ET_CORE: u16  = 4;
+pub const ET_NUM: usize = 5;
+
+pub const EM_MIPS: u16 = 8;
 
 #[derive(Debug)]
 pub enum ElfParseError {
@@ -224,6 +251,17 @@ impl ElfFile {
 		ehdr_data_string(self.e_ident[EI_DATA])
 	}
 
+	pub fn ehdr_osabi_string(&self) -> String {
+		ehdr_osabi_string(self.e_ident[EI_OSABI])
+	}
+
+	pub fn ehdr_type_string(&self) -> String {
+		ehdr_type_string(self.e_type)
+	}
+
+	pub fn ehdr_machine_string(&self) -> String {
+		ehdr_machine_string(self.e_machine)
+	}
 }
 
 impl Loader for ElfFile {
@@ -247,6 +285,30 @@ pub fn ehdr_data_string(e_data: u8) -> String {
 		ELFDATA2MSB => "2's complement, big endian".to_string(),
 
 		_ => format!("Unknown ELF Data {:#x}", e_data),
+	}
+}
+
+pub fn ehdr_osabi_string(e_osabi: u8) -> String {
+	match e_osabi {
+		ELFOSABI_SYSV => "Unix - System V".to_string(),
+		
+		_ => format!("Unknown ELF OS/ABI {:#x}", e_osabi),
+	}
+}
+
+pub fn ehdr_type_string(e_type: u16) -> String {
+	match e_type {
+		ET_EXEC => "EXEC (Executable file)".to_string(),
+
+		_ => format!("Unknown ELF Type: {:#x}", e_type),
+	}
+}
+
+pub fn ehdr_machine_string(e_machine: u16) -> String {
+	match e_machine {
+		EM_MIPS => "MIPS R3000".to_string(),
+
+		_ => format!("Unknown ELF Machine {:#x}", e_machine),
 	}
 }
 
