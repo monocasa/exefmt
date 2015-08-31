@@ -62,6 +62,60 @@ pub const ET_NUM: usize = 5;
 
 pub const EM_MIPS: u16 = 8;
 
+pub const EF_MIPS_NOREORDER: u32     = 0x00000001;
+pub const EF_MIPS_PIC: u32           = 0x00000002;
+pub const EF_MIPS_CPIC: u32          = 0x00000004;
+pub const EF_MIPS_XGOT: u32          = 0x00000008;
+pub const EF_MIPS_UCODE: u32         = 0x00000010;
+pub const EF_MIPS_ABI2: u32          = 0x00000020;
+pub const EF_MIPS_OPTIONS_FIRST: u32 = 0x00000080;
+pub const EF_MIPS_32BITMODE: u32     = 0x00000100;
+pub const EF_MIPS_FP64: u32          = 0x00000200;
+pub const EF_MIPS_NAN2008: u32       = 0x00000400;
+
+pub const EF_MIPS_ABI: u32 = 0x0000F000;
+pub const EF_MIPS_ABI_O32:    u32 = 0x00001000;
+pub const EF_MIPS_ABI_O64:    u32 = 0x00002000;
+pub const EF_MIPS_ABI_EABI32: u32 = 0x00003000;
+pub const EF_MIPS_ABI_EABI64: u32 = 0x00004000;
+
+pub const EF_MIPS_MACH: u32 = 0x00FF0000;
+pub const EF_MIPS_MACH_3900: u32    = 0x00810000;
+pub const EF_MIPS_MACH_4010: u32    = 0x00820000;
+pub const EF_MIPS_MACH_4100: u32    = 0x00830000;
+pub const EF_MIPS_MACH_4650: u32    = 0x00850000;
+pub const EF_MIPS_MACH_4120: u32    = 0x00870000;
+pub const EF_MIPS_MACH_4111: u32    = 0x00880000;
+pub const EF_MIPS_MACH_SB1: u32     = 0x008A0000;
+pub const EF_MIPS_MACH_OCTEON: u32  = 0x008B0000;
+pub const EF_MIPS_MACH_XLR: u32     = 0x008C0000;
+pub const EF_MIPS_MACH_OCTEON2: u32 = 0x008D0000;
+pub const EF_MIPS_MACH_OCTEON3: u32 = 0x008E0000;
+pub const EF_MIPS_MACH_5400: u32    = 0x00910000;
+pub const EF_MIPS_MACH_5900: u32    = 0x00920000;
+pub const EF_MIPS_MACH_5500: u32    = 0x00980000;
+pub const EF_MIPS_MACH_9000: u32    = 0x00990000;
+pub const EF_MIPS_MACH_LS2E: u32    = 0x00A00000;
+pub const EF_MIPS_MACH_LS2F: u32    = 0x00A10000;
+pub const EF_MIPS_MACH_LS3A: u32    = 0x00A20000;
+
+pub const EF_MIPS_MICROMIPS: u32     = 0x02000000;
+pub const EF_MIPS_ARCH_ASE_M16: u32  = 0x04000000;
+pub const EF_MIPS_ARCH_ASE_MDMX: u32 = 0x08000000;
+
+pub const EF_MIPS_ARCH: u32 = 0xF0000000;
+pub const EF_MIPS_ARCH1:     u32 = 0x00000000;
+pub const EF_MIPS_ARCH2:     u32 = 0x10000000;
+pub const EF_MIPS_ARCH3:     u32 = 0x20000000;
+pub const EF_MIPS_ARCH4:     u32 = 0x30000000;
+pub const EF_MIPS_ARCH5:     u32 = 0x40000000;
+pub const EF_MIPS_ARCH_32:   u32 = 0x50000000;
+pub const EF_MIPS_ARCH_64:   u32 = 0x60000000;
+pub const EF_MIPS_ARCH_32R2: u32 = 0x70000000;
+pub const EF_MIPS_ARCH_64R2: u32 = 0x80000000;
+pub const EF_MIPS_ARCH_32R6: u32 = 0x90000000;
+pub const EF_MIPS_ARCH_64R6: u32 = 0xA0000000;
+
 #[derive(Debug)]
 pub enum ElfParseError {
 	UnexpectedEOF,
@@ -264,6 +318,10 @@ impl ElfFile {
 	pub fn ehdr_machine_string(&self) -> String {
 		ehdr_machine_string(self.e_machine)
 	}
+
+	pub fn ehdr_flags_strings(&self) -> Vec<String> {
+		ehdr_flags_strings(self.e_machine, self.e_flags)
+	}
 }
 
 impl Loader for ElfFile {
@@ -311,6 +369,86 @@ pub fn ehdr_machine_string(e_machine: u16) -> String {
 		EM_MIPS => "MIPS R3000".to_string(),
 
 		_ => format!("Unknown ELF Machine {:#x}", e_machine),
+	}
+}
+
+fn ehdr_mips_flags_strings(e_flags: u32) -> Vec<String> {
+	let mut strs = Vec::<String>::new();
+
+	if (e_flags & EF_MIPS_NOREORDER) != 0     { strs.push("noreorder".to_string());     }
+	if (e_flags & EF_MIPS_PIC) != 0           { strs.push("pic".to_string());           }
+	if (e_flags & EF_MIPS_CPIC) != 0          { strs.push("cpic".to_string());          }
+	if (e_flags & EF_MIPS_XGOT) != 0          { strs.push("xgot".to_string());          }
+	if (e_flags & EF_MIPS_UCODE) != 0         { strs.push("ugen_reserved".to_string()); }
+	if (e_flags & EF_MIPS_OPTIONS_FIRST) != 0 { strs.push("odk first".to_string());     }
+	if (e_flags & EF_MIPS_32BITMODE) != 0     { strs.push("32bitmode".to_string());     }
+	if (e_flags & EF_MIPS_FP64) != 0          { strs.push("fp64".to_string());          }
+	if (e_flags & EF_MIPS_NAN2008) != 0       { strs.push("nan2008".to_string());       }
+
+	if (e_flags & EF_MIPS_ABI) != 0 {
+		strs.push( match e_flags & EF_MIPS_ABI {
+			EF_MIPS_ABI_O32    => "o32".to_string(),
+			EF_MIPS_ABI_O64    => "o64".to_string(),
+			EF_MIPS_ABI_EABI32 => "eabi32".to_string(),
+			EF_MIPS_ABI_EABI64 => "eabi64".to_string(),
+
+			_ => "unknown ABI".to_string(),
+		});
+	}
+
+	if (e_flags & EF_MIPS_MACH) != 0 {
+		strs.push( match e_flags & EF_MIPS_MACH {
+			EF_MIPS_MACH_3900    => "3900".to_string(),
+			EF_MIPS_MACH_4010    => "4010".to_string(),
+			EF_MIPS_MACH_4100    => "4100".to_string(),
+			EF_MIPS_MACH_4650    => "4650".to_string(),
+			EF_MIPS_MACH_4120    => "4120".to_string(),
+			EF_MIPS_MACH_4111    => "4111".to_string(),
+			EF_MIPS_MACH_SB1     => "sb1".to_string(),
+			EF_MIPS_MACH_OCTEON  => "octeon".to_string(),
+			EF_MIPS_MACH_XLR     => "xlr".to_string(),
+			EF_MIPS_MACH_OCTEON2 => "octeon2".to_string(),
+			EF_MIPS_MACH_OCTEON3 => "octeon2".to_string(),
+			EF_MIPS_MACH_5400    => "5400".to_string(),
+			EF_MIPS_MACH_5900    => "5900".to_string(),
+			EF_MIPS_MACH_5500    => "5500".to_string(),
+			EF_MIPS_MACH_9000    => "9000".to_string(),
+			EF_MIPS_MACH_LS2E    => "loonson-2e".to_string(),
+			EF_MIPS_MACH_LS2F    => "loonson-2f".to_string(),
+			EF_MIPS_MACH_LS3A    => "loonson-3a".to_string(),
+
+			_ => "unknown CPU".to_string(),
+		});
+	}
+
+	if (e_flags & EF_MIPS_MICROMIPS) != 0     { strs.push("micromips".to_string()); }
+	if (e_flags & EF_MIPS_ARCH_ASE_M16) != 0  { strs.push("mips16".to_string());    }
+	if (e_flags & EF_MIPS_ARCH_ASE_MDMX) != 0 { strs.push("mdmx".to_string());      }
+
+	strs.push( match e_flags & EF_MIPS_ARCH {
+		EF_MIPS_ARCH1     => "mips1".to_string(),
+		EF_MIPS_ARCH2     => "mips2".to_string(),
+		EF_MIPS_ARCH3     => "mips3".to_string(),
+		EF_MIPS_ARCH4     => "mips4".to_string(),
+		EF_MIPS_ARCH5     => "mips5".to_string(),
+		EF_MIPS_ARCH_32   => "mips32".to_string(),
+		EF_MIPS_ARCH_64   => "mips64".to_string(),
+		EF_MIPS_ARCH_32R2 => "mips32r2".to_string(),
+		EF_MIPS_ARCH_64R2 => "mips64r2".to_string(),
+		EF_MIPS_ARCH_32R6 => "mips32r6".to_string(),
+		EF_MIPS_ARCH_64R6 => "mips64r6".to_string(),
+
+		_ => "unknown ISA".to_string(),
+	});
+
+	strs
+}
+
+pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
+	match e_machine {
+		EM_MIPS => ehdr_mips_flags_strings(e_flags),
+
+		_ => Vec::<String>::new(),
 	}
 }
 
