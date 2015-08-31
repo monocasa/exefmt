@@ -49,6 +49,8 @@ pub const ELFOSABI_ARM_AEABI: u8  = 64;
 pub const ELFOSABI_ARM: u8        = 97;
 pub const ELFOSABI_STANDALONE: u8 = 255;
 
+pub const EI_ABIVERSION: usize = 8;
+
 pub const EI_NIDENT: usize = 16;
 
 pub const ET_NONE: u16  = 0;
