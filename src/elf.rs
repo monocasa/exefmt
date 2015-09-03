@@ -349,9 +349,13 @@ pub fn ehdr_osabi_string(e_osabi: u8) -> String {
 
 pub fn ehdr_type_string(e_type: u16) -> String {
 	match e_type {
+		ET_NONE => "NONE (None)".to_string(),
+		ET_CORE => "CORE (Core file)".to_string(),
+		ET_DYN  => "DYN (Shared object file)".to_string(),
 		ET_EXEC => "EXEC (Executable file)".to_string(),
+		ET_REL => "REL (Relocatable file)".to_string(),
 
-		_ => format!("Unknown ELF Type: {:#x}", e_type),
+		_ => format!("<unknown>: {:#x}", e_type),
 	}
 }
 
