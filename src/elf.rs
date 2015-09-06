@@ -478,7 +478,7 @@ pub fn ehdr_osabi_string(e_osabi: u8) -> String {
 		ELFOSABI_NONE       => "UNIX - System V",
 		ELFOSABI_HPUX       => "UNIX - HP-UX",
 		ELFOSABI_NETBSD     => "UNIX - NetBSD",
-		ELFOSABI_LINUX      => "UNIX - Linux",
+		ELFOSABI_GNU        => "UNIX - GNU",
 		ELFOSABI_HURD       => "GNU/Hurd",
 		ELFOSABI_SOLARIS    => "UNIX - Solaris",
 		ELFOSABI_AIX        => "UNIX - AIX",
