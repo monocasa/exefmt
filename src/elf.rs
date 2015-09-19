@@ -4,7 +4,7 @@ use std::io;
 
 use self::byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
-use loader::Loader;
+use super::Loader;
 
 pub const EI_MAG0: usize = 0;
 pub const ELFMAG0: u8 = 0x7F;
