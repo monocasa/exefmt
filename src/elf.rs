@@ -443,9 +443,21 @@ impl ElfFile {
 	}
 }
 
-impl Loader for ElfFile {
+pub struct ElfLoader {
+	elf: ElfFile,
+}
+
+impl ElfLoader {
+	pub fn new(elf: ElfFile) -> ElfLoader {
+		ElfLoader {
+			elf: elf,
+		}
+	}
+}
+
+impl Loader for ElfLoader {
 	fn entry_point(&self) -> u64 {
-		self.e_entry
+		self.elf.e_entry
 	}
 }
 
