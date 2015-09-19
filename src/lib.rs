@@ -1,6 +1,6 @@
 pub mod elf;
 
 pub trait Loader {
-	fn entry_point(&self) -> u64;
+	fn entry_point(&self) -> Option<u64>;
 }
 

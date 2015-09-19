@@ -456,8 +456,8 @@ impl ElfLoader {
 }
 
 impl Loader for ElfLoader {
-	fn entry_point(&self) -> u64 {
-		self.elf.e_entry
+	fn entry_point(&self) -> Option<u64> {
+		Some(self.elf.e_entry)
 	}
 }
 
