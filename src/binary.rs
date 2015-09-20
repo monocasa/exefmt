@@ -1,6 +1,8 @@
 use std::fs::File;
 use std::io::Error;
 
+use super::Loader;
+
 pub struct Segment {
 	pub name: String,
 	pub load_base: u64,
@@ -32,6 +34,12 @@ impl BinLoader {
 		} );
 
 		Ok(bin_ldr)
+	}
+}
+
+impl Loader for BinLoader {
+	fn entry_point(&self) -> Option<u64> {
+		self.entry
 	}
 }
 
