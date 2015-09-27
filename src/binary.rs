@@ -1,15 +1,7 @@
-use std::fs::File;
-use std::io::Error;
+use std::fs;
+use std::io;
 
-use super::Loader;
-
-pub struct Segment {
-	pub name: String,
-	pub load_base: u64,
-	pub stream_base: u64,
-	pub file_size: u64,
-	pub mem_size: u64,
-}
+use super::{Loader, Segment};
 
 pub struct BinLoader {
 	pub segments: Vec<Segment>,
@@ -17,7 +9,7 @@ pub struct BinLoader {
 }
 
 impl BinLoader {
-	pub fn new(file: &mut File) -> Result<BinLoader, Error> {
+	pub fn new(file: &mut fs::File) -> Result<BinLoader, io::Error> {
 		let mut bin_ldr = BinLoader {
 			segments: Vec::<Segment>::new(),
 			entry: None,
@@ -31,6 +23,8 @@ impl BinLoader {
 			stream_base: 0,
 			file_size: meta.len(),
 			mem_size: meta.len(),
+			read_only: false,
+			executable: false,
 		} );
 
 		Ok(bin_ldr)
@@ -40,6 +34,22 @@ impl BinLoader {
 impl Loader for BinLoader {
 	fn entry_point(&self) -> Option<u64> {
 		self.entry
+	}
+
+	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
+			where S: io::Read + io::Seek {
+		let mut ret = Vec::<(Segment, Vec<u8>)>::new();
+
+		for segment in self.segments.clone() {
+			if filter(&segment) {
+				let mut data = vec![0u8; segment.file_size as usize];
+				try!(stream.seek(io::SeekFrom::Start(segment.stream_base)));
+				try!(stream.read(data.as_mut_slice()));
+				ret.push((segment, data));
+			}
+		}
+
+		Ok(ret)
 	}
 }
 

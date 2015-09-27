@@ -4,7 +4,7 @@ use std::io;
 
 use self::byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
-use super::Loader;
+use super::{Loader, Segment};
 
 pub const EI_MAG0: usize = 0;
 pub const ELFMAG0: u8 = 0x7F;
@@ -266,6 +266,16 @@ impl From<byteorder::Error> for ElfParseError {
 }
 
 #[derive(Default)]
+pub struct ElfSym {
+	pub st_name: u32,
+	pub st_info: u8,
+	pub st_other: u8,
+	pub st_shndx: u16,
+	pub st_value: u64,
+	pub st_size: u64,
+}
+
+#[derive(Default)]
 pub struct ElfFile {
 	pub e_ident: [u8; EI_NIDENT],
 	pub e_type: u16,
@@ -418,6 +428,10 @@ impl ElfFile {
 		Ok(elf)
 	}
 
+	//pub fn read_symbols(&self, rdr: &mut io::Read) -> Result<[ElfSym], ElfParseError> {
+	//	Err(ElfParseError::UnexpectedEOF)
+	//}
+
 	pub fn ehdr_class_string(&self) -> String {
 		ehdr_class_string(self.e_ident[EI_CLASS])
 	}
@@ -458,6 +472,12 @@ impl ElfLoader {
 impl Loader for ElfLoader {
 	fn entry_point(&self) -> Option<u64> {
 		Some(self.elf.e_entry)
+	}
+
+	#[allow(unused_variables)]
+	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
+			where S: io::Read + io::Seek {
+		Err(io::Error::new(io::ErrorKind::Other, "Unimplemented"))
 	}
 }
 
