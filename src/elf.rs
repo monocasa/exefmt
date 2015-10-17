@@ -457,14 +457,27 @@ impl ElfFile {
 	}
 }
 
-pub struct ElfLoader {
-	pub elf: ElfFile,
+#[derive(PartialEq)]
+pub enum ElfLoadFrom {
+	ProgramHeaders,
+	SectionHeaders,
 }
+
+impl Default for ElfLoadFrom {
+	fn default() -> ElfLoadFrom { ElfLoadFrom::SectionHeaders }
+}
+
+pub struct ElfLoader {
+	pub elf:       ElfFile,
+	pub load_from: ElfLoadFrom,
+}
+
 
 impl ElfLoader {
 	pub fn new(elf: ElfFile) -> ElfLoader {
 		ElfLoader {
 			elf: elf,
+			load_from: ElfLoadFrom::default(),
 		}
 	}
 }
@@ -477,7 +490,11 @@ impl Loader for ElfLoader {
 	#[allow(unused_variables)]
 	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
 			where S: io::Read + io::Seek {
-		Err(io::Error::new(io::ErrorKind::Other, "Unimplemented"))
+		if self.load_from == ElfLoadFrom::SectionHeaders {
+			Err(io::Error::new(io::ErrorKind::Other, "get_segments from SectionHeader unimplemented"))
+		} else {
+			Err(io::Error::new(io::ErrorKind::Other, "get_segments from ProgramHeader unimplemented"))
+		}
 	}
 }
 
