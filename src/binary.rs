@@ -51,5 +51,9 @@ impl Loader for BinLoader {
 
 		Ok(ret)
 	}
+
+	fn fmt_str(&self) -> String {
+		"binary".to_string()
+	}
 }
 

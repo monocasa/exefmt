@@ -20,5 +20,6 @@ pub trait Loader {
 	fn entry_point(&self) -> Option<u64>;
 	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
 			where S: io::Read + io::Seek;
+	fn fmt_str(&self) -> String;
 }
 

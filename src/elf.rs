@@ -496,6 +496,21 @@ impl Loader for ElfLoader {
 			Err(io::Error::new(io::ErrorKind::Other, "get_segments from ProgramHeader unimplemented"))
 		}
 	}
+
+	fn fmt_str(&self) -> String {
+		let fmt = match self.elf.e_ident[EI_CLASS] {
+			ELFCLASS32 => "elf32".to_string(),
+			ELFCLASS64 => "elf64".to_string(),
+			_          => "elfunknownclass".to_string(),
+		};
+
+		let machine = match self.elf.e_machine {
+			EM_PPC | EM_PPC64 | EM_PPC_OLD => "powerpc".to_string(),
+			_   => format!("unknown_machine_{:#x}", self.elf.e_machine),
+		};
+
+		fmt + "-" + machine.as_ref()
+	}
 }
 
 pub fn ehdr_class_string(e_class: u8) -> String {
