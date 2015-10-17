@@ -464,7 +464,7 @@ pub enum ElfLoadFrom {
 }
 
 impl Default for ElfLoadFrom {
-	fn default() -> ElfLoadFrom { ElfLoadFrom::SectionHeaders }
+	fn default() -> ElfLoadFrom { ElfLoadFrom::ProgramHeaders }
 }
 
 pub struct ElfLoader {
