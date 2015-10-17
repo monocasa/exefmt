@@ -458,7 +458,7 @@ impl ElfFile {
 }
 
 pub struct ElfLoader {
-	elf: ElfFile,
+	pub elf: ElfFile,
 }
 
 impl ElfLoader {
