@@ -276,6 +276,20 @@ pub struct ElfSym {
 }
 
 #[derive(Default)]
+pub struct ElfShdr {
+	pub sh_name: u32,
+	pub sh_type: u32,
+	pub sh_flags: u64,
+	pub sh_addr: u64,
+	pub sh_offset: u64,
+	pub sh_size: u64,
+	pub sh_link: u32,
+	pub sh_info: u32,
+	pub sh_addralign: u64,
+	pub sh_entsize: u64,
+}
+
+#[derive(Default)]
 pub struct ElfFile {
 	pub e_ident: [u8; EI_NIDENT],
 	pub e_type: u16,
@@ -291,6 +305,8 @@ pub struct ElfFile {
 	pub e_shentsize: u16,
 	pub e_shnum: u16,
 	pub e_shstrndx: u16,
+
+	pub shdrs: Vec<ElfShdr>,
 }
 
 impl ElfFile {
@@ -310,6 +326,8 @@ impl ElfFile {
 			e_shentsize: 0,
 			e_shnum:     0,
 			e_shstrndx:  0,
+
+			shdrs: Vec::new(),
 		}
 	}
 
@@ -365,7 +383,8 @@ impl ElfFile {
 		})
 	}
 
-	pub fn read(rdr: &mut io::Read) -> Result<ElfFile, ElfParseError> {
+	pub fn read<S>(rdr: &mut S) -> Result<ElfFile, ElfParseError> 
+			where S: io::Read + io::Seek {
 		let mut elf = ElfFile::new();
 
 		match rdr.read(&mut elf.e_ident) {
@@ -423,6 +442,47 @@ impl ElfFile {
 
 		if elf.e_version != (EV_CURRENT as u32) {
 			return Err(ElfParseError::InvalidVersion);
+		}
+
+		for n in 0..elf.e_shnum as u64 {
+			let offset = elf.e_shoff + (n + (elf.e_shentsize as u64));
+			try!(rdr.seek(io::SeekFrom::Start(offset)));
+
+			let mut shdr = ElfShdr::default();
+
+			match elf.e_ident[EI_CLASS] {
+				ELFCLASS32 => {
+					shdr.sh_name      = try!(elf.read_u32(rdr));
+					shdr.sh_type      = try!(elf.read_u32(rdr));
+					shdr.sh_flags     = try!(elf.read_u32(rdr)) as u64;
+					shdr.sh_addr      = try!(elf.read_u32(rdr)) as u64;
+					shdr.sh_offset    = try!(elf.read_u32(rdr)) as u64;
+					shdr.sh_size      = try!(elf.read_u32(rdr)) as u64;
+					shdr.sh_link      = try!(elf.read_u32(rdr));
+					shdr.sh_info      = try!(elf.read_u32(rdr));
+					shdr.sh_addralign = try!(elf.read_u32(rdr)) as u64;
+					shdr.sh_entsize   = try!(elf.read_u32(rdr)) as u64;
+				},
+
+				ELFCLASS64 => {
+					shdr.sh_name      = try!(elf.read_u32(rdr));
+					shdr.sh_type      = try!(elf.read_u32(rdr));
+					shdr.sh_flags     = try!(elf.read_u64(rdr));
+					shdr.sh_addr      = try!(elf.read_u64(rdr));
+					shdr.sh_offset    = try!(elf.read_u64(rdr));
+					shdr.sh_size      = try!(elf.read_u64(rdr));
+					shdr.sh_link      = try!(elf.read_u32(rdr));
+					shdr.sh_info      = try!(elf.read_u32(rdr));
+					shdr.sh_addralign = try!(elf.read_u64(rdr));
+					shdr.sh_entsize   = try!(elf.read_u64(rdr));
+				},
+
+				_ => {
+					return Err(ElfParseError::InvalidIdent);
+				},
+			}
+
+			elf.shdrs.push( shdr );
 		}
 
 		Ok(elf)
