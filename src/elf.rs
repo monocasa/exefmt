@@ -445,7 +445,7 @@ impl ElfFile {
 		}
 
 		for n in 0..elf.e_shnum as u64 {
-			let offset = elf.e_shoff + (n + (elf.e_shentsize as u64));
+			let offset = elf.e_shoff + (n * (elf.e_shentsize as u64));
 			try!(rdr.seek(io::SeekFrom::Start(offset)));
 
 			let mut shdr = ElfShdr::default();
