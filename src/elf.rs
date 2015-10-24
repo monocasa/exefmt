@@ -244,6 +244,31 @@ pub const EF_MIPS_ARCH_64R2: u32 = 0x80000000;
 pub const EF_MIPS_ARCH_32R6: u32 = 0x90000000;
 pub const EF_MIPS_ARCH_64R6: u32 = 0xA0000000;
 
+pub const SHT_NULL:          u32 = 0;
+pub const SHT_PROGBITS:      u32 = 1;
+pub const SHT_SYMTAB:        u32 = 2;
+pub const SHT_STRTAB:        u32 = 3;
+pub const SHT_RELA:          u32 = 4;
+pub const SHT_HASH:          u32 = 5;
+pub const SHT_DYNAMIC:       u32 = 6;
+pub const SHT_NOTE:          u32 = 7;
+pub const SHT_NOBITS:        u32 = 8;
+pub const SHT_REL:           u32 = 9;
+pub const SHT_SHLIB:         u32 = 10;
+pub const SHT_DYNSYM:        u32 = 11;
+pub const SHT_INIT_ARRAY:    u32 = 14;
+pub const SHT_FINI_ARRAY:    u32 = 15;
+pub const SHT_PREINIT_ARRAY: u32 = 16;
+pub const SHT_GROUP:         u32 = 17;
+pub const SHT_SYMTAB_SHNDX:  u32 = 18;
+
+pub const SHT_LOOS:   u32 = 0x60000000;
+pub const SHT_HIOS:   u32 = 0x6FFFFFFF;
+pub const SHT_LOPROC: u32 = 0x70000000;
+pub const SHT_HIPROC: u32 = 0x7FFFFFFF;
+pub const SHT_LOUSER: u32 = 0x80000000;
+pub const SHT_HIUSER: u32 = 0xFFFFFFFF;
+
 #[derive(Debug)]
 pub enum ElfParseError {
 	UnexpectedEOF,
@@ -287,6 +312,12 @@ pub struct ElfShdr {
 	pub sh_info: u32,
 	pub sh_addralign: u64,
 	pub sh_entsize: u64,
+}
+
+impl ElfShdr {
+	pub fn type_string(&self) -> String {
+		shdr_type_string(self.sh_type)
+	}
 }
 
 #[derive(Default)]
@@ -817,5 +848,39 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 
 		_ => Vec::<String>::new(),
 	}
+}
+
+pub fn shdr_type_string(sh_type: u32) -> String {
+	match sh_type {
+		SHT_NULL          => "NULL",
+		SHT_PROGBITS      => "PROGBITS",
+		SHT_SYMTAB        => "SYMTAB",
+		SHT_STRTAB        => "STRTAB",
+		SHT_RELA          => "RELA",
+		SHT_HASH          => "HASH",
+		SHT_DYNAMIC       => "DYNAMIC",
+		SHT_NOTE          => "NOTE",
+		SHT_NOBITS        => "NOBITS",
+		SHT_REL           => "REL",
+		SHT_SHLIB         => "SHLIB",
+		SHT_DYNSYM        => "DYNSYM",
+		SHT_INIT_ARRAY    => "INIT_ARRAY",
+		SHT_FINI_ARRAY    => "FINI_ARRAY",
+		SHT_PREINIT_ARRAY => "PREINIT_ARRAY",
+		SHT_GROUP         => "GROUP",
+		SHT_SYMTAB_SHNDX  => "SYMTAB_SHNDX",
+
+		SHT_LOUSER ... SHT_HIUSER => {
+			return format!("LOUSER+{:x}", sh_type - SHT_LOUSER);
+		},
+
+		SHT_LOPROC ... SHT_HIPROC => {
+			return format!("LOPROC+{:x}", sh_type - SHT_LOPROC);
+		},
+
+		_ => {
+			return format!("LOOS+{:x}", sh_type - SHT_LOOS);
+		},
+	}.to_string()
 }
 
