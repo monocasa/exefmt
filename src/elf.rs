@@ -580,7 +580,7 @@ impl ElfFile {
 
 		let mut value = String::new();
 
-		while (cur_off >= self.strtab.len()) && (self.strtab[cur_off] != 0) {
+		while (cur_off <= self.strtab.len()) && (self.strtab[cur_off] != 0) {
 			value.push(self.strtab[cur_off] as char);
 			cur_off += 1;
 		}
