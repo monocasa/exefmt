@@ -269,6 +269,10 @@ pub const SHT_HIPROC: u32 = 0x7FFFFFFF;
 pub const SHT_LOUSER: u32 = 0x80000000;
 pub const SHT_HIUSER: u32 = 0xFFFFFFFF;
 
+pub const SHF_WRITE:     u64 = 0x00000001;
+pub const SHF_ALLOC:     u64 = 0x00000002;
+pub const SHF_EXECINSTR: u64 = 0x00000004;
+
 #[derive(Debug)]
 pub enum ElfParseError {
 	UnexpectedEOF,
@@ -622,11 +626,34 @@ impl Loader for ElfLoader {
 	#[allow(unused_variables)]
 	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
 			where S: io::Read + io::Seek {
+		let mut ret_vec: Vec<(Segment, Vec<u8>)> = Vec::new();
+
 		if self.load_from == ElfLoadFrom::SectionHeaders {
-			Err(io::Error::new(io::ErrorKind::Other, "get_segments from SectionHeader unimplemented"))
+			let mut cur_sec_num: u16 = 0;
+			for shdr in self.elf.shdrs.iter() {
+				let segment = Segment {
+					name: match self.elf.read_str(shdr.sh_name) {
+						Some(x) => x,
+						None    => format!(""),
+					},
+					load_base: shdr.sh_addr,
+					stream_base: shdr.sh_offset,
+					file_size: if shdr.sh_type == SHT_NOBITS { 0 } else { shdr.sh_size },
+					mem_size: shdr.sh_size,
+					read_only: (shdr.sh_flags & SHF_WRITE) != 0,
+					executable: (shdr.sh_flags & SHF_EXECINSTR) != 0,
+				};
+
+				if filter(&segment) {
+					ret_vec.push((segment, try!(self.elf.read_section_data(cur_sec_num, stream))));
+				}
+				cur_sec_num += 1;
+			}
 		} else {
-			Err(io::Error::new(io::ErrorKind::Other, "get_segments from ProgramHeader unimplemented"))
+			return Err(io::Error::new(io::ErrorKind::Other, "get_segments from ProgramHeader unimplemented"));
 		}
+
+		Ok(ret_vec)
 	}
 
 	fn fmt_str(&self) -> String {
