@@ -338,6 +338,8 @@ pub struct ElfFile {
 	pub e_shstrndx: u16,
 
 	pub shdrs: Vec<ElfShdr>,
+
+	pub strtab: Vec<u8>,
 }
 
 impl ElfFile {
@@ -359,6 +361,8 @@ impl ElfFile {
 			e_shstrndx:  0,
 
 			shdrs: Vec::new(),
+
+			strtab: Vec::new(),
 		}
 	}
 
@@ -516,6 +520,8 @@ impl ElfFile {
 			elf.shdrs.push( shdr );
 		}
 
+		elf.strtab = try!(elf.read_section_data(elf.e_shstrndx, rdr));
+
 		Ok(elf)
 	}
 
@@ -545,6 +551,41 @@ impl ElfFile {
 
 	pub fn ehdr_flags_strings(&self) -> Vec<String> {
 		ehdr_flags_strings(self.e_machine, self.e_flags)
+	}
+
+	pub fn read_section_data<S>(&self, shnum: u16, stream: &mut S) -> Result<Vec<u8>, io::Error>
+			where S: io::Read + io::Seek {
+		let shdr = match self.shdrs.get(shnum as usize) {
+			Some(x) => x,
+			None    => {
+				return Err(io::Error::new(io::ErrorKind::Other, format!("Section number {} out of bounds (max={})", shnum, self.e_shnum)));
+			},
+		};
+
+		try!(stream.seek(io::SeekFrom::Start(shdr.sh_offset)));
+
+		let mut data = vec![0u8; shdr.sh_size as usize];
+
+		try!(stream.read(data.as_mut_slice()));
+
+		Ok(data)
+	}
+
+	pub fn read_str(&self, offset: u32) -> Option<String> {
+		let mut cur_off = offset as usize;
+
+		if cur_off >= self.strtab.len() {
+			return None;
+		}
+
+		let mut value = String::new();
+
+		while (cur_off >= self.strtab.len()) && (self.strtab[cur_off] != 0) {
+			value.push(self.strtab[cur_off] as char);
+			cur_off += 1;
+		}
+
+		Some(value)
 	}
 }
 
