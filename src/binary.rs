@@ -25,6 +25,7 @@ impl BinLoader {
 			mem_size: meta.len(),
 			read_only: false,
 			executable: false,
+			present_when_loaded: true,
 		} );
 
 		Ok(bin_ldr)

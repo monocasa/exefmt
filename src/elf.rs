@@ -642,6 +642,7 @@ impl Loader for ElfLoader {
 					mem_size: shdr.sh_size,
 					read_only: (shdr.sh_flags & SHF_WRITE) != 0,
 					executable: (shdr.sh_flags & SHF_EXECINSTR) != 0,
+					present_when_loaded: (shdr.sh_flags & SHF_ALLOC) != 0,
 				};
 
 				if filter(&segment) {

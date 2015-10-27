@@ -14,6 +14,7 @@ pub struct Segment {
 	pub mem_size: u64,
 	pub read_only: bool,
 	pub executable: bool,
+	pub present_when_loaded: bool,
 }
 
 pub trait Loader {
