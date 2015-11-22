@@ -392,6 +392,13 @@ impl ElfFile {
 			self.is_data_valid() && self.is_ver_valid()
 	}
 
+	fn read_u8(&self, rdr: &mut io::Read) -> Result<u8, ElfParseError> {
+		Ok(match rdr.read_u8() {
+			Ok(byte) => byte,
+			Err(_) => return Err(ElfParseError::InvalidIdent),
+		})
+	}
+
 	fn read_u16(&self, rdr: &mut io::Read) -> Result<u16, ElfParseError> {
 		Ok(match self.e_ident[EI_DATA] {
 			ELFDATA2LSB => try!(rdr.read_u16::<LittleEndian>()),
@@ -529,9 +536,54 @@ impl ElfFile {
 		Ok(elf)
 	}
 
-	//pub fn read_symbols(&self, rdr: &mut io::Read) -> Result<[ElfSym], ElfParseError> {
-	//	Err(ElfParseError::UnexpectedEOF)
-	//}
+	pub fn read_symbols<S>(&self, rdr: &mut S) -> Result<Vec<ElfSym>, ElfParseError>
+			where S: io::Read + io::Seek
+	{
+		let mut syms: Vec<ElfSym> = Vec::new();
+		let mut cur_section_num: u16 = 0;
+
+		for shdr in self.shdrs.iter() {
+			if shdr.sh_type == SHT_SYMTAB {
+				let section_data = try!(self.read_section_data(cur_section_num, rdr));
+				let section_len = section_data.len() as u64;
+
+				let mut buffer = io::Cursor::new(section_data);
+
+				while buffer.position() != section_len {
+					let mut sym = ElfSym::default();
+
+					match self.e_ident[EI_CLASS] {
+						ELFCLASS32 => {
+							sym.st_name  = try!(self.read_u32(&mut buffer));
+							sym.st_value = try!(self.read_u32(&mut buffer)) as u64;
+							sym.st_size  = try!(self.read_u32(&mut buffer)) as u64;
+							sym.st_info  = try!(self.read_u8(&mut buffer));
+							sym.st_other = try!(self.read_u8(&mut buffer));
+							sym.st_shndx = try!(self.read_u16(&mut buffer));
+						},
+
+						ELFCLASS64 => {
+							sym.st_name  = try!(self.read_u32(&mut buffer));
+							sym.st_info  = try!(self.read_u8(&mut buffer));
+							sym.st_other = try!(self.read_u8(&mut buffer));
+							sym.st_shndx = try!(self.read_u16(&mut buffer));
+							sym.st_value = try!(self.read_u64(&mut buffer));
+							sym.st_size  = try!(self.read_u64(&mut buffer));
+						},
+
+						_ => {
+							return Err(ElfParseError::InvalidIdent);
+						},
+					}
+
+					syms.push( sym );
+				}
+			}
+			cur_section_num += 1;
+		}
+
+		Ok(syms)
+	}
 
 	pub fn ehdr_class_string(&self) -> String {
 		ehdr_class_string(self.e_ident[EI_CLASS])
