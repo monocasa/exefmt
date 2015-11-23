@@ -364,6 +364,7 @@ pub const SHT_HIUSER: u32 = 0xFFFFFFFF;
 pub const SHF_WRITE:     u64 = 0x00000001;
 pub const SHF_ALLOC:     u64 = 0x00000002;
 pub const SHF_EXECINSTR: u64 = 0x00000004;
+pub const SHF_TLS:       u64 = 0x00000400;
 
 #[derive(Debug)]
 pub enum ElfParseError {
