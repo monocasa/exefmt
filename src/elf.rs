@@ -306,7 +306,7 @@ pub struct ElfSym {
 
 impl ElfSym {
 	pub fn shndx_string(&self) -> String {
-		sym_type_string(self.st_shndx)
+		sym_shndx_string(self.st_shndx)
 	}
 }
 
@@ -977,7 +977,7 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 	}
 }
 
-pub fn sym_type_string(st_shndx: u16) -> String {
+pub fn sym_shndx_string(st_shndx: u16) -> String {
 	match st_shndx {
 		0      => "UND".to_string(),
 		0xFFF1 => "ABS".to_string(),
