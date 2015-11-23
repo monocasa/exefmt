@@ -244,6 +244,15 @@ pub const EF_MIPS_ARCH_64R2: u32 = 0x80000000;
 pub const EF_MIPS_ARCH_32R6: u32 = 0x90000000;
 pub const EF_MIPS_ARCH_64R6: u32 = 0xA0000000;
 
+pub const STB_LOCAL:  u8 = 0;
+pub const STB_GLOBAL: u8 = 1;
+pub const STB_WEAK:   u8 = 2;
+pub const STB_LOOS:   u8 = 10;
+pub const STB_HIOS:   u8 = 12;
+pub const STB_LOPROC: u8 = 13;
+pub const STB_HIPROC: u8 = 15;
+
+
 pub const STT_NOTYPE:  u8 = 0;
 pub const STT_OBJECT:  u8 = 1;
 pub const STT_FUNC:    u8 = 2;
@@ -332,12 +341,20 @@ impl ElfSym {
 		sym_type_from_info(self.st_info)
 	}
 
+	pub fn st_bind(&self) -> u8 {
+		sym_bind_from_info(self.st_info)
+	}
+
 	pub fn shndx_string(&self) -> String {
 		sym_shndx_string(self.st_shndx)
 	}
 
 	pub fn type_string(&self, e_machine: u16) -> String {
 		sym_type_string(self.st_type(), e_machine)
+	}
+
+	pub fn bind_string(&self) -> String {
+		sym_bind_string(self.st_bind())
 	}
 }
 
@@ -1008,6 +1025,10 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 	}
 }
 
+pub fn sym_bind_from_info(info: u8) -> u8 {
+	info >> 4
+}
+
 pub fn sym_type_from_info(info: u8) -> u8 {
 	info & 0x0F
 }
@@ -1018,6 +1039,17 @@ pub fn sym_shndx_string(st_shndx: u16) -> String {
 		0xFFF1 => "ABS".to_string(),
 		shndx  => format!("{}", shndx),
 	}
+}
+
+pub fn sym_bind_string(stt_bind: u8) -> String {
+	match stt_bind {
+		STB_LOCAL                 => "LOCAL",
+		STB_GLOBAL                => "GLOBAL",
+		STB_WEAK                  => "WEAK",
+		STB_LOOS   ... STB_HIOS   => return format!("<OS specific>: {}", stt_bind),
+		STB_LOPROC ... STB_HIPROC => return format!("<processor specific>: {}", stt_bind),
+		_                         => return format!("<unknown>: {}", stt_bind),
+	}.to_string()
 }
 
 pub fn sym_type_string(stt_type: u8, e_machine: u16) -> String {
