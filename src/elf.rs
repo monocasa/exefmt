@@ -244,6 +244,29 @@ pub const EF_MIPS_ARCH_64R2: u32 = 0x80000000;
 pub const EF_MIPS_ARCH_32R6: u32 = 0x90000000;
 pub const EF_MIPS_ARCH_64R6: u32 = 0xA0000000;
 
+pub const STT_NOTYPE:  u8 = 0;
+pub const STT_OBJECT:  u8 = 1;
+pub const STT_FUNC:    u8 = 2;
+pub const STT_SECTION: u8 = 3;
+pub const STT_FILE:    u8 = 4;
+pub const STT_COMMON:  u8 = 5;
+pub const STT_TLS:     u8 = 6;
+pub const STT_RELC:    u8 = 8;
+pub const STT_SRELC:   u8 = 9;
+pub const STT_LOOS:    u8 = 10;
+pub const STT_HIOS:    u8 = 12;
+pub const STT_LOPROC:  u8 = 13;
+pub const STT_HIPROC:  u8 = 15;
+
+pub const STT_REGISTER:         u8 = STT_LOPROC + 0;
+
+pub const STT_ARM_TFUNC:        u8 = STT_LOPROC + 0;
+
+pub const STT_HP_OPAQUE:        u8 = STT_LOOS   + 1;
+pub const STT_HP_STUB:          u8 = STT_LOOS   + 2;
+
+pub const STT_PARISC_MILLICODE: u8 = STT_LOPROC + 0;
+
 pub const SHT_NULL:          u32 = 0;
 pub const SHT_PROGBITS:      u32 = 1;
 pub const SHT_SYMTAB:        u32 = 2;
@@ -305,8 +328,16 @@ pub struct ElfSym {
 }
 
 impl ElfSym {
+	pub fn st_type(&self) -> u8 {
+		sym_type_from_info(self.st_info)
+	}
+
 	pub fn shndx_string(&self) -> String {
 		sym_shndx_string(self.st_shndx)
+	}
+
+	pub fn type_string(&self, e_machine: u16) -> String {
+		sym_type_string(self.st_type(), e_machine)
 	}
 }
 
@@ -977,12 +1008,38 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 	}
 }
 
+pub fn sym_type_from_info(info: u8) -> u8 {
+	info & 0x0F
+}
+
 pub fn sym_shndx_string(st_shndx: u16) -> String {
 	match st_shndx {
 		0      => "UND".to_string(),
 		0xFFF1 => "ABS".to_string(),
 		shndx  => format!("{}", shndx),
 	}
+}
+
+pub fn sym_type_string(stt_type: u8, e_machine: u16) -> String {
+	match (stt_type, e_machine) {
+		(STT_NOTYPE,           _)          => "NOTYPE",
+		(STT_OBJECT,           _)          => "OBJECT",
+		(STT_FUNC,             _)          => "FUNC",
+		(STT_SECTION,          _)          => "SECTION",
+		(STT_FILE,             _)          => "FILE",
+		(STT_COMMON,           _)          => "COMMON",
+		(STT_TLS,              _)          => "TLS",
+		(STT_RELC,             _)          => "RELC",
+		(STT_SRELC,            _)          => "SRELC",
+		(STT_ARM_TFUNC,        EM_ARM)     => "THUMB_FUNC",
+		(STT_HP_OPAQUE,        EM_PARISC)  => "HP_OPAQUE",
+		(STT_HP_STUB,          EM_PARISC)  => "HP_STUB",
+		(STT_PARISC_MILLICODE, EM_PARISC)  => "PARISC_MILLI",
+		(STT_REGISTER,         EM_SPARCV9) => "REGISTER",
+		(STT_LOPROC ... STT_HIPROC, _) => return format!("<processor specific>: {}", stt_type),
+		(STT_LOOS   ... STT_HIOS,   _) => return format!("<OS specifc: {}", stt_type),
+		(_, _)                         => return format!("<unknown>: {}", stt_type),
+	}.to_string()
 }
 
 pub fn shdr_type_string(sh_type: u32) -> String {
