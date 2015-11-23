@@ -304,6 +304,12 @@ pub struct ElfSym {
 	pub st_size: u64,
 }
 
+impl ElfSym {
+	pub fn shndx_string(&self) -> String {
+		sym_type_string(self.st_shndx)
+	}
+}
+
 #[derive(Default)]
 pub struct ElfShdr {
 	pub sh_name: u32,
@@ -968,6 +974,14 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 		EM_MIPS => ehdr_mips_flags_strings(e_flags),
 
 		_ => Vec::<String>::new(),
+	}
+}
+
+pub fn sym_type_string(st_shndx: u16) -> String {
+	match st_shndx {
+		0      => "UND".to_string(),
+		0xFFF1 => "ABS".to_string(),
+		shndx  => format!("{}", shndx),
 	}
 }
 
