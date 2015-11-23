@@ -371,6 +371,31 @@ impl ElfSym {
 }
 
 #[derive(Default)]
+pub struct ElfStrtab {
+	pub shnum: u16,
+	pub data: Vec<u8>,
+}
+
+impl ElfStrtab {
+	pub fn read_str(&self, offset: u32) -> Option<String> {
+		let mut cur_off = offset as usize;
+
+		if cur_off >= self.data.len() {
+			return None;
+		}
+
+		let mut value = String::new();
+
+		while (cur_off <= self.data.len()) && (self.data[cur_off] != 0) {
+			value.push(self.data[cur_off] as char);
+			cur_off += 1;
+		}
+
+		Some(value)
+	}
+}
+
+#[derive(Default)]
 pub struct ElfShdr {
 	pub sh_name: u32,
 	pub sh_type: u32,
@@ -409,7 +434,7 @@ pub struct ElfFile {
 
 	pub shdrs: Vec<ElfShdr>,
 
-	pub strtab: Vec<u8>,
+	pub strtab: ElfStrtab,
 }
 
 impl ElfFile {
@@ -432,7 +457,7 @@ impl ElfFile {
 
 			shdrs: Vec::new(),
 
-			strtab: Vec::new(),
+			strtab: ElfStrtab::default(),
 		}
 	}
 
@@ -597,7 +622,7 @@ impl ElfFile {
 			elf.shdrs.push( shdr );
 		}
 
-		elf.strtab = try!(elf.read_section_data(elf.e_shstrndx, rdr));
+		elf.strtab = try!(elf.read_section_as_strtab(elf.e_shstrndx, rdr));
 
 		Ok(elf)
 	}
@@ -651,7 +676,7 @@ impl ElfFile {
 				syms.push( sym );
 			}
 
-			let cur_section_name = match self.read_str(shdr.sh_name) {
+			let cur_section_name = match self.strtab.read_str(shdr.sh_name) {
 				Some(name) => name,
 				None       => format!(""),
 			};
@@ -705,21 +730,11 @@ impl ElfFile {
 		Ok(data)
 	}
 
-	pub fn read_str(&self, offset: u32) -> Option<String> {
-		let mut cur_off = offset as usize;
+	pub fn read_section_as_strtab<S>(&self, shnum: u16, stream: &mut S) -> Result<ElfStrtab, io::Error>
+			where S: io::Read + io::Seek {
+		let data = try!(self.read_section_data(shnum, stream));
 
-		if cur_off >= self.strtab.len() {
-			return None;
-		}
-
-		let mut value = String::new();
-
-		while (cur_off <= self.strtab.len()) && (self.strtab[cur_off] != 0) {
-			value.push(self.strtab[cur_off] as char);
-			cur_off += 1;
-		}
-
-		Some(value)
+		Ok(ElfStrtab{ shnum: shnum, data: data })
 	}
 }
 
@@ -762,7 +777,7 @@ impl Loader for ElfLoader {
 			let mut cur_sec_num: u16 = 0;
 			for shdr in self.elf.shdrs.iter() {
 				let segment = Segment {
-					name: match self.elf.read_str(shdr.sh_name) {
+					name: match self.elf.strtab.read_str(shdr.sh_name) {
 						Some(x) => x,
 						None    => format!(""),
 					},
