@@ -602,13 +602,15 @@ impl ElfFile {
 		Ok(elf)
 	}
 
-	pub fn read_symbols<S>(&self, rdr: &mut S) -> Result<Vec<ElfSym>, ElfParseError>
+	pub fn read_symbols<S>(&self, rdr: &mut S) -> Result<Vec<(String, u16, Vec<ElfSym>)>, ElfParseError>
 			where S: io::Read + io::Seek
 	{
-		let mut syms: Vec<ElfSym> = Vec::new();
+		let mut symtabs: Vec<(String, u16, Vec<ElfSym>)> = Vec::new();
 		let mut cur_section_num: u16 = 0;
 
 		for shdr in self.shdrs.iter() {
+			let mut syms: Vec<ElfSym> = Vec::new();
+
 			if shdr.sh_type == SHT_SYMTAB {
 				let section_data = try!(self.read_section_data(cur_section_num, rdr));
 				let section_len = section_data.len() as u64;
@@ -645,10 +647,17 @@ impl ElfFile {
 					syms.push( sym );
 				}
 			}
+
+			let cur_section_name = match self.read_str(shdr.sh_name) {
+				Some(name) => name,
+				None       => format!(""),
+			};
+
+			symtabs.push((cur_section_name, cur_section_num, syms));
 			cur_section_num += 1;
 		}
 
-		Ok(syms)
+		Ok(symtabs)
 	}
 
 	pub fn ehdr_class_string(&self) -> String {
