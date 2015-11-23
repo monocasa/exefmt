@@ -252,7 +252,6 @@ pub const STB_HIOS:   u8 = 12;
 pub const STB_LOPROC: u8 = 13;
 pub const STB_HIPROC: u8 = 15;
 
-
 pub const STT_NOTYPE:  u8 = 0;
 pub const STT_OBJECT:  u8 = 1;
 pub const STT_FUNC:    u8 = 2;
@@ -275,6 +274,11 @@ pub const STT_HP_OPAQUE:        u8 = STT_LOOS   + 1;
 pub const STT_HP_STUB:          u8 = STT_LOOS   + 2;
 
 pub const STT_PARISC_MILLICODE: u8 = STT_LOPROC + 0;
+
+pub const STV_DEFAULT:   u8 = 0;
+pub const STV_INTERNAL:  u8 = 1;
+pub const STV_HIDDEN:    u8 = 2;
+pub const STV_PROTECTED: u8 = 3;
 
 pub const SHT_NULL:          u32 = 0;
 pub const SHT_PROGBITS:      u32 = 1;
@@ -345,6 +349,10 @@ impl ElfSym {
 		sym_bind_from_info(self.st_info)
 	}
 
+	pub fn st_visibility(&self) -> u8 {
+		sym_visibility_from_other(self.st_other)
+	}
+
 	pub fn shndx_string(&self) -> String {
 		sym_shndx_string(self.st_shndx)
 	}
@@ -355,6 +363,10 @@ impl ElfSym {
 
 	pub fn bind_string(&self) -> String {
 		sym_bind_string(self.st_bind())
+	}
+
+	pub fn visibility_string(&self) -> String {
+		sym_visibility_string(self.st_visibility())
 	}
 }
 
@@ -1033,6 +1045,10 @@ pub fn sym_type_from_info(info: u8) -> u8 {
 	info & 0x0F
 }
 
+pub fn sym_visibility_from_other(other: u8) -> u8 {
+	other & 0x7
+}
+
 pub fn sym_shndx_string(st_shndx: u16) -> String {
 	match st_shndx {
 		0      => "UND".to_string(),
@@ -1071,6 +1087,16 @@ pub fn sym_type_string(stt_type: u8, e_machine: u16) -> String {
 		(STT_LOPROC ... STT_HIPROC, _) => return format!("<processor specific>: {}", stt_type),
 		(STT_LOOS   ... STT_HIOS,   _) => return format!("<OS specifc: {}", stt_type),
 		(_, _)                         => return format!("<unknown>: {}", stt_type),
+	}.to_string()
+}
+
+pub fn sym_visibility_string(stt_visibility: u8) -> String {
+	match stt_visibility {
+		STV_DEFAULT   => "DEFAULT",
+		STV_INTERNAL  => "INTERNAL",
+		STV_HIDDEN    => "HIDDEN",
+		STV_PROTECTED => "PROTECTED",
+		_             => return format!("<unknown>: {}", stt_visibility),
 	}.to_string()
 }
 
