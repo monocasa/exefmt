@@ -612,6 +612,7 @@ impl ElfFile {
 			let mut syms: Vec<ElfSym> = Vec::new();
 
 			if shdr.sh_type != SHT_SYMTAB {
+				cur_section_num += 1;
 				continue;
 			}
 
