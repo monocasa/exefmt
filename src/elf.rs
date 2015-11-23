@@ -611,41 +611,43 @@ impl ElfFile {
 		for shdr in self.shdrs.iter() {
 			let mut syms: Vec<ElfSym> = Vec::new();
 
-			if shdr.sh_type == SHT_SYMTAB {
-				let section_data = try!(self.read_section_data(cur_section_num, rdr));
-				let section_len = section_data.len() as u64;
+			if shdr.sh_type != SHT_SYMTAB {
+				continue;
+			}
 
-				let mut buffer = io::Cursor::new(section_data);
+			let section_data = try!(self.read_section_data(cur_section_num, rdr));
+			let section_len = section_data.len() as u64;
 
-				while buffer.position() != section_len {
-					let mut sym = ElfSym::default();
+			let mut buffer = io::Cursor::new(section_data);
 
-					match self.e_ident[EI_CLASS] {
-						ELFCLASS32 => {
-							sym.st_name  = try!(self.read_u32(&mut buffer));
-							sym.st_value = try!(self.read_u32(&mut buffer)) as u64;
-							sym.st_size  = try!(self.read_u32(&mut buffer)) as u64;
-							sym.st_info  = try!(self.read_u8(&mut buffer));
-							sym.st_other = try!(self.read_u8(&mut buffer));
-							sym.st_shndx = try!(self.read_u16(&mut buffer));
-						},
+			while buffer.position() != section_len {
+				let mut sym = ElfSym::default();
 
-						ELFCLASS64 => {
-							sym.st_name  = try!(self.read_u32(&mut buffer));
-							sym.st_info  = try!(self.read_u8(&mut buffer));
-							sym.st_other = try!(self.read_u8(&mut buffer));
-							sym.st_shndx = try!(self.read_u16(&mut buffer));
-							sym.st_value = try!(self.read_u64(&mut buffer));
-							sym.st_size  = try!(self.read_u64(&mut buffer));
-						},
+				match self.e_ident[EI_CLASS] {
+					ELFCLASS32 => {
+						sym.st_name  = try!(self.read_u32(&mut buffer));
+						sym.st_value = try!(self.read_u32(&mut buffer)) as u64;
+						sym.st_size  = try!(self.read_u32(&mut buffer)) as u64;
+						sym.st_info  = try!(self.read_u8(&mut buffer));
+						sym.st_other = try!(self.read_u8(&mut buffer));
+						sym.st_shndx = try!(self.read_u16(&mut buffer));
+					},
 
-						_ => {
-							return Err(ElfParseError::InvalidIdent);
-						},
-					}
+					ELFCLASS64 => {
+						sym.st_name  = try!(self.read_u32(&mut buffer));
+						sym.st_info  = try!(self.read_u8(&mut buffer));
+						sym.st_other = try!(self.read_u8(&mut buffer));
+						sym.st_shndx = try!(self.read_u16(&mut buffer));
+						sym.st_value = try!(self.read_u64(&mut buffer));
+						sym.st_size  = try!(self.read_u64(&mut buffer));
+					},
 
-					syms.push( sym );
+					_ => {
+						return Err(ElfParseError::InvalidIdent);
+					},
 				}
+
+				syms.push( sym );
 			}
 
 			let cur_section_name = match self.read_str(shdr.sh_name) {
