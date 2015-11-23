@@ -244,6 +244,62 @@ pub const EF_MIPS_ARCH_64R2: u32 = 0x80000000;
 pub const EF_MIPS_ARCH_32R6: u32 = 0x90000000;
 pub const EF_MIPS_ARCH_64R6: u32 = 0xA0000000;
 
+pub const PF_X: u32 = 0x00000001;
+pub const PF_W: u32 = 0x00000002;
+pub const PF_R: u32 = 0x00000004;
+
+pub const PT_NULL:    u32 = 0;
+pub const PT_LOAD:    u32 = 1;
+pub const PT_DYNAMIC: u32 = 2;
+pub const PT_INTERP:  u32 = 3;
+pub const PT_NOTE:    u32 = 4;
+pub const PT_SHLIB:   u32 = 5;
+pub const PT_PHDR:    u32 = 6;
+pub const PT_TLS:     u32 = 7;
+
+pub const PT_LOOS:   u32 = 0x60000000;
+pub const PT_HIOS:   u32 = 0x6fffffff;
+pub const PT_LOPROC: u32 = 0x70000000;
+pub const PT_HIPROC: u32 = 0x7fffffff;
+
+pub const PT_ARM_EXIDX: u32 = PT_LOPROC + 1;
+
+pub const PT_GNU_EH_FRAME: u32 = PT_LOOS + 0x474e550; //'GNU' + 0.  Cute.
+pub const PT_GNU_STACK:    u32 = PT_LOOS + 0x474e551;
+pub const PT_GNU_RELRO:    u32 = PT_LOOS + 0x474e552;
+
+pub const PT_HP_TLS:           u32 = PT_LOOS + 0x00;
+pub const PT_HP_CORE_NONE:     u32 = PT_LOOS + 0x01;
+pub const PT_HP_CORE_VERSION:  u32 = PT_LOOS + 0x02;
+pub const PT_HP_CORE_KERNEL:   u32 = PT_LOOS + 0x03;
+pub const PT_HP_CORE_COMM:     u32 = PT_LOOS + 0x04;
+pub const PT_HP_CORE_PROC:     u32 = PT_LOOS + 0x05;
+pub const PT_HP_CORE_LOADABLE: u32 = PT_LOOS + 0x06;
+pub const PT_HP_CORE_STACK:    u32 = PT_LOOS + 0x07;
+pub const PT_HP_CORE_SHM:      u32 = PT_LOOS + 0x08;
+pub const PT_HP_CORE_MMF:      u32 = PT_LOOS + 0x09;
+pub const PT_HP_PARALLEL:      u32 = PT_LOOS + 0x10;
+pub const PT_HP_FASTBIND:      u32 = PT_LOOS + 0x11;
+pub const PT_HP_OPT_ANNOT:     u32 = PT_LOOS + 0x12;
+pub const PT_HP_HSL_ANNOT:     u32 = PT_LOOS + 0x13;
+pub const PT_HP_STACK:         u32 = PT_LOOS + 0x14;
+pub const PT_HP_CORE_UTSNAME:  u32 = PT_LOOS + 0x15;
+
+pub const PT_IA_64_ARCHEXT: u32 = PT_LOPROC + 0;
+pub const PT_IA_64_UNWIND:  u32 = PT_LOPROC + 1;
+
+pub const PT_IA_64_HP_OPT_ANOT: u32 = PT_HP_OPT_ANNOT;
+pub const PT_IA_64_HP_HSL_ANOT: u32 = PT_HP_HSL_ANNOT;
+pub const PT_IA_64_HP_STACK:    u32 = PT_HP_STACK;
+
+pub const PT_MIPS_REGINFO: u32 = PT_LOPROC + 0;
+pub const PT_MIPS_RTPROC:  u32 = PT_LOPROC + 1;
+pub const PT_MIPS_OPTIONS: u32 = PT_LOPROC + 2;
+
+pub const PT_PARISC_ARCHEXT:   u32 = PT_LOPROC + 0;
+pub const PT_PARISC_UNWIND:    u32 = PT_LOPROC + 1;
+pub const PT_PARISC_WEAKORDER: u32 = PT_LOPROC + 2;
+
 pub const STB_LOCAL:  u8 = 0;
 pub const STB_GLOBAL: u8 = 1;
 pub const STB_WEAK:   u8 = 2;
@@ -327,6 +383,28 @@ impl From<byteorder::Error> for ElfParseError {
 			byteorder::Error::UnexpectedEOF => ElfParseError::UnexpectedEOF,
 			byteorder::Error::Io(ioerr) => ElfParseError::Io(ioerr),
 		}
+	}
+}
+
+#[derive(Default)]
+pub struct ElfPhdr {
+	pub p_type: u32,
+	pub p_flags: u32,
+	pub p_offset: u64,
+	pub p_vaddr: u64,
+	pub p_paddr: u64,
+	pub p_filesz: u64,
+	pub p_memsz: u64,
+	pub p_align: u64
+}
+
+impl ElfPhdr {
+	pub fn flags_string(&self) -> String {
+		phdr_flags_string(self.p_flags)
+	}
+
+	pub fn type_string(&self, e_machine: u16) -> String {
+		phdr_type_string(self.p_type, e_machine)
 	}
 }
 
@@ -432,6 +510,7 @@ pub struct ElfFile {
 	pub e_shnum: u16,
 	pub e_shstrndx: u16,
 
+	pub phdrs: Vec<ElfPhdr>,
 	pub shdrs: Vec<ElfShdr>,
 
 	pub strtab: ElfStrtab,
@@ -455,6 +534,7 @@ impl ElfFile {
 			e_shnum:     0,
 			e_shstrndx:  0,
 
+			phdrs: Vec::new(),
 			shdrs: Vec::new(),
 
 			strtab: ElfStrtab::default(),
@@ -579,6 +659,43 @@ impl ElfFile {
 
 		if elf.e_version != (EV_CURRENT as u32) {
 			return Err(ElfParseError::InvalidVersion);
+		}
+
+		for n in 0..elf.e_phnum as u64 {
+			let offset = elf.e_phoff + (n * (elf.e_phentsize as u64));
+			try!(rdr.seek(io::SeekFrom::Start(offset)));
+
+			let mut phdr = ElfPhdr::default();
+
+			match elf.e_ident[EI_CLASS] {
+				ELFCLASS32 => {
+					phdr.p_type   = try!(elf.read_u32(rdr));
+					phdr.p_offset = try!(elf.read_u32(rdr)) as u64;
+					phdr.p_vaddr  = try!(elf.read_u32(rdr)) as u64;
+					phdr.p_paddr  = try!(elf.read_u32(rdr)) as u64;
+					phdr.p_filesz = try!(elf.read_u32(rdr)) as u64;
+					phdr.p_memsz  = try!(elf.read_u32(rdr)) as u64;
+					phdr.p_flags  = try!(elf.read_u32(rdr));
+					phdr.p_align  = try!(elf.read_u32(rdr)) as u64;
+				},
+
+				ELFCLASS64 => {
+					phdr.p_type   = try!(elf.read_u32(rdr));
+					phdr.p_flags  = try!(elf.read_u32(rdr));
+					phdr.p_offset = try!(elf.read_u64(rdr));
+					phdr.p_vaddr  = try!(elf.read_u64(rdr));
+					phdr.p_paddr  = try!(elf.read_u64(rdr));
+					phdr.p_filesz = try!(elf.read_u64(rdr));
+					phdr.p_memsz  = try!(elf.read_u64(rdr));
+					phdr.p_align  = try!(elf.read_u64(rdr));
+				},
+
+				_ => {
+					return Err(ElfParseError::InvalidIdent);
+				},
+			}
+
+			elf.phdrs.push( phdr );
 		}
 
 		for n in 0..elf.e_shnum as u64 {
@@ -1062,6 +1179,66 @@ pub fn ehdr_flags_strings(e_machine: u16, e_flags: u32) -> Vec<String> {
 
 		_ => Vec::<String>::new(),
 	}
+}
+
+pub fn phdr_flags_string(p_flags: u32) -> String {
+	format!("{}{}{}",
+		if (p_flags & PF_R) != 0 { "R" } else { " " },
+		if (p_flags & PF_W) != 0 { "W" } else { " " },
+		if (p_flags & PF_X) != 0 { "E" } else { " " })
+}
+
+pub fn phdr_type_string(p_type: u32, e_machine: u16) -> String {
+	match (p_type, e_machine) {
+		(PT_NULL,         _) => "NULL",
+		(PT_LOAD,         _) => "LOAD",
+		(PT_DYNAMIC,      _) => "DYNAMIC",
+		(PT_INTERP,       _) => "INTERP",
+		(PT_NOTE,         _) => "NOTE",
+		(PT_SHLIB,        _) => "SHLIB",
+		(PT_PHDR,         _) => "PHDR",
+		(PT_TLS,          _) => "TLS",
+		(PT_GNU_EH_FRAME, _) => "GNU_EH_FRAME",
+		(PT_GNU_STACK,    _) => "GNU_STACK",
+		(PT_GNU_RELRO,    _) => "GNU_RELRO",
+
+		(PT_ARM_EXIDX, EM_ARM) => "EXIDX",
+
+		(PT_MIPS_REGINFO, EM_MIPS) | (PT_MIPS_REGINFO, EM_MIPS_RS3_LE) => "REGINFO",
+		(PT_MIPS_RTPROC,  EM_MIPS) | (PT_MIPS_RTPROC,  EM_MIPS_RS3_LE) => "RTPROC",
+		(PT_MIPS_OPTIONS, EM_MIPS) | (PT_MIPS_OPTIONS, EM_MIPS_RS3_LE) => "OPTIONS",
+
+		(PT_HP_TLS,           EM_PARISC) => "HP_TLS",
+		(PT_HP_CORE_NONE,     EM_PARISC) => "HP_CORE_NONE",
+		(PT_HP_CORE_VERSION,  EM_PARISC) => "HP_CORE_VERSION",
+		(PT_HP_CORE_KERNEL,   EM_PARISC) => "HP_CORE_KERNEL",
+		(PT_HP_CORE_COMM,     EM_PARISC) => "HP_CORE_COMM",
+		(PT_HP_CORE_PROC,     EM_PARISC) => "HP_CORE_PROC",
+		(PT_HP_CORE_LOADABLE, EM_PARISC) => "HP_CORE_LOADABLE",
+		(PT_HP_CORE_STACK,    EM_PARISC) => "HP_CORE_STACK",
+		(PT_HP_CORE_SHM,      EM_PARISC) => "HP_CORE_SHM",
+		(PT_HP_CORE_MMF,      EM_PARISC) => "HP_CORE_MMF",
+		(PT_HP_PARALLEL,      EM_PARISC) => "HP_PARALLEL",
+		(PT_HP_FASTBIND,      EM_PARISC) => "HP_FASTBIND",
+		(PT_HP_OPT_ANNOT,     EM_PARISC) => "HP_OPT_ANNOT",
+		(PT_HP_HSL_ANNOT,     EM_PARISC) => "HP_HSL_ANNOT",
+		(PT_HP_STACK,         EM_PARISC) => "HP_STACK",
+		(PT_HP_CORE_UTSNAME,  EM_PARISC) => "HP_CORE_UTSNAME",
+		(PT_PARISC_ARCHEXT,   EM_PARISC) => "PARISC_ARCHEXT",
+		(PT_PARISC_UNWIND,    EM_PARISC) => "PARISC_UNWIND",
+		(PT_PARISC_WEAKORDER, EM_PARISC) => "PARISC_WEAKORDER",
+
+		(PT_IA_64_ARCHEXT,     EM_IA_64) => "IA_64_ARCHEXT",
+		(PT_IA_64_UNWIND,      EM_IA_64) => "IA_64_UNWIND",
+		(PT_HP_TLS,            EM_IA_64) => "HP_TLS",
+		(PT_IA_64_HP_OPT_ANOT, EM_IA_64) => "HP_OPT_ANNOT",
+		(PT_IA_64_HP_HSL_ANOT, EM_IA_64) => "HP_HSL_ANNOT",
+		(PT_IA_64_HP_STACK,    EM_IA_64) => "HP_STACK",
+
+		(PT_LOPROC ... PT_HIPROC, _) => return format!("LOPROC+{:x}", p_type - PT_LOPROC),
+		(PT_LOOS   ... PT_HIOS,   _) => return format!("LOOS+{:x}", p_type - PT_LOOS),
+		(_, _)                       => return format!("<unknown>: {:x}", p_type),
+	}.to_string()
 }
 
 pub fn sym_bind_from_info(info: u8) -> u8 {
