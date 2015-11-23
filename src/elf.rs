@@ -754,7 +754,7 @@ impl ElfFile {
 		for shdr in self.shdrs.iter() {
 			let mut syms: Vec<ElfSym> = Vec::new();
 
-			if shdr.sh_type != SHT_SYMTAB || shdr.sh_type != SHT_DYNSYM {
+			if shdr.sh_type != SHT_SYMTAB && shdr.sh_type != SHT_DYNSYM {
 				cur_section_num += 1;
 				continue;
 			}
