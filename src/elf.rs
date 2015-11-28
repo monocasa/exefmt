@@ -4,7 +4,7 @@ use std::io;
 
 use self::byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
-use super::{Loader, Segment};
+use super::{Loader, SeekReadStream, Segment};
 
 pub const EI_MAG0: usize = 0;
 pub const ELFMAG0: u8 = 0x7F;
@@ -632,14 +632,14 @@ impl ElfFile {
 			self.is_data_valid() && self.is_ver_valid()
 	}
 
-	fn read_u8(&self, rdr: &mut io::Read) -> Result<u8, ElfParseError> {
+	fn read_u8(&self, rdr: &mut SeekReadStream) -> Result<u8, ElfParseError> {
 		Ok(match rdr.read_u8() {
 			Ok(byte) => byte,
 			Err(_) => return Err(ElfParseError::InvalidIdent),
 		})
 	}
 
-	fn read_u16(&self, rdr: &mut io::Read) -> Result<u16, ElfParseError> {
+	fn read_u16(&self, rdr: &mut SeekReadStream) -> Result<u16, ElfParseError> {
 		Ok(match self.e_ident[EI_DATA] {
 			ELFDATA2LSB => try!(rdr.read_u16::<LittleEndian>()),
 			ELFDATA2MSB => try!(rdr.read_u16::<BigEndian>()),
@@ -649,7 +649,7 @@ impl ElfFile {
 		})
 	}
 
-	fn read_u32(&self, rdr: &mut io::Read) -> Result<u32, ElfParseError> {
+	fn read_u32(&self, rdr: &mut SeekReadStream) -> Result<u32, ElfParseError> {
 		Ok(match self.e_ident[EI_DATA] {
 			ELFDATA2LSB => try!(rdr.read_u32::<LittleEndian>()),
 			ELFDATA2MSB => try!(rdr.read_u32::<BigEndian>()),
@@ -659,7 +659,7 @@ impl ElfFile {
 		})
 	}
 
-	fn read_u64(&self, rdr: &mut io::Read) -> Result<u64, ElfParseError> {
+	fn read_u64(&self, rdr: &mut SeekReadStream) -> Result<u64, ElfParseError> {
 		Ok(match self.e_ident[EI_DATA] {
 			ELFDATA2LSB => try!(rdr.read_u64::<LittleEndian>()),
 			ELFDATA2MSB => try!(rdr.read_u64::<BigEndian>()),
@@ -669,8 +669,7 @@ impl ElfFile {
 		})
 	}
 
-	pub fn read<S>(rdr: &mut S) -> Result<ElfFile, ElfParseError> 
-			where S: io::Read + io::Seek {
+	pub fn read(rdr: &mut SeekReadStream) -> Result<ElfFile, ElfParseError> {
 		let mut elf = ElfFile::new();
 
 		match rdr.read(&mut elf.e_ident) {
@@ -813,8 +812,7 @@ impl ElfFile {
 		Ok(elf)
 	}
 
-	pub fn read_symbols<S>(&self, rdr: &mut S) -> Result<Vec<(String, u16, Vec<ElfSym>)>, ElfParseError>
-			where S: io::Read + io::Seek
+	pub fn read_symbols(&self, rdr: &mut SeekReadStream) -> Result<Vec<(String, u16, Vec<ElfSym>)>, ElfParseError>
 	{
 		let mut symtabs: Vec<(String, u16, Vec<ElfSym>)> = Vec::new();
 		let mut cur_section_num: u16 = 0;
@@ -898,8 +896,7 @@ impl ElfFile {
 		ehdr_flags_strings(self.e_machine, self.e_flags)
 	}
 
-	pub fn read_section_data<S>(&self, shnum: u16, stream: &mut S) -> Result<Vec<u8>, io::Error>
-			where S: io::Read + io::Seek {
+	pub fn read_section_data(&self, shnum: u16, stream: &mut SeekReadStream) -> Result<Vec<u8>, io::Error> {
 		let shdr = match self.shdrs.get(shnum as usize) {
 			Some(x) => x,
 			None    => {
@@ -916,8 +913,7 @@ impl ElfFile {
 		Ok(data)
 	}
 
-	pub fn read_section_as_strtab<S>(&self, shnum: u16, stream: &mut S) -> Result<ElfStrtab, io::Error>
-			where S: io::Read + io::Seek {
+	pub fn read_section_as_strtab(&self, shnum: u16, stream: &mut SeekReadStream) -> Result<ElfStrtab, io::Error> {
 		let data = try!(self.read_section_data(shnum, stream));
 
 		Ok(ElfStrtab{ shnum: shnum, data: data })
@@ -955,8 +951,7 @@ impl Loader for ElfLoader {
 	}
 
 	#[allow(unused_variables)]
-	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
-			where S: io::Read + io::Seek {
+	fn get_segments(&self, filter: &Fn(&Segment) -> bool, stream: &mut SeekReadStream) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> {
 		let mut ret_vec: Vec<(Segment, Vec<u8>)> = Vec::new();
 
 		if self.load_from == ElfLoadFrom::SectionHeaders {

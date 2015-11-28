@@ -17,10 +17,13 @@ pub struct Segment {
 	pub present_when_loaded: bool,
 }
 
+pub trait SeekReadStream : io::Seek + io::Read {}
+
+impl<T: io::Seek + io::Read> SeekReadStream for T { }
+
 pub trait Loader {
 	fn entry_point(&self) -> Option<u64>;
-	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
-			where S: io::Read + io::Seek;
+	fn get_segments(&self, filter: &Fn(&Segment) -> bool, stream: &mut SeekReadStream) -> Result<Vec<(Segment, Vec<u8>)>, io::Error>;
 	fn fmt_str(&self) -> String;
 }
 

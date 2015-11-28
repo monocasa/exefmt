@@ -1,7 +1,7 @@
 use std::fs;
 use std::io;
 
-use super::{Loader, Segment};
+use super::{Loader, SeekReadStream, Segment};
 
 pub struct BinLoader {
 	pub segments: Vec<Segment>,
@@ -37,8 +37,7 @@ impl Loader for BinLoader {
 		self.entry
 	}
 
-	fn get_segments<S>(&self, filter: &Fn(&Segment) -> bool, stream: &mut S) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> 
-			where S: io::Read + io::Seek {
+	fn get_segments(&self, filter: &Fn(&Segment) -> bool, stream: &mut SeekReadStream) -> Result<Vec<(Segment, Vec<u8>)>, io::Error> {
 		let mut ret = Vec::<(Segment, Vec<u8>)>::new();
 
 		for segment in self.segments.clone() {
