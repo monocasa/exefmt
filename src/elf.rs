@@ -361,6 +361,74 @@ pub const SHT_HIPROC: u32 = 0x7FFFFFFF;
 pub const SHT_LOUSER: u32 = 0x80000000;
 pub const SHT_HIUSER: u32 = 0xFFFFFFFF;
 
+pub const SHT_GNU_LIBLIST: u32 = SHT_LOOS + 0xFFFFFF7;
+pub const SHT_GNU_VERDEF:  u32 = SHT_LOOS + 0xFFFFFFD;
+pub const SHT_GNU_VERNEED: u32 = SHT_LOOS + 0xFFFFFFE;
+pub const SHT_GNU_VERSYM:  u32 = SHT_LOOS + 0xFFFFFFF;
+
+pub const SHT_ARM_EXIDX:          u32 = SHT_LOPROC + 1;
+pub const SHT_ARM_PREEMPTMAP:     u32 = SHT_LOPROC + 2;
+pub const SHT_ARM_ATTRIBUTES:     u32 = SHT_LOPROC + 3;
+pub const SHT_ARM_DEBUGOVERLAY:   u32 = SHT_LOPROC + 4;
+pub const SHT_ARM_OVERLAYSECTION: u32 = SHT_LOPROC + 5;
+
+pub const SHT_MIPS_LIBLIST:       u32 = SHT_LOPROC + 0x00;
+pub const SHT_MIPS_MSYM:          u32 = SHT_LOPROC + 0x01;
+pub const SHT_MIPS_CONFLICT:      u32 = SHT_LOPROC + 0x02;
+pub const SHT_MIPS_GPTAB:         u32 = SHT_LOPROC + 0x03;
+pub const SHT_MIPS_UCODE:         u32 = SHT_LOPROC + 0x04;
+pub const SHT_MIPS_DEBUG:         u32 = SHT_LOPROC + 0x05;
+pub const SHT_MIPS_REGINFO:       u32 = SHT_LOPROC + 0x06;
+pub const SHT_MIPS_PACKAGE:       u32 = SHT_LOPROC + 0x07;
+pub const SHT_MIPS_PACKSYM:       u32 = SHT_LOPROC + 0x08;
+pub const SHT_MIPS_RELD:          u32 = SHT_LOPROC + 0x09;
+pub const SHT_MIPS_IFACE:         u32 = SHT_LOPROC + 0x0B;
+pub const SHT_MIPS_CONTENT:       u32 = SHT_LOPROC + 0x0C;
+pub const SHT_MIPS_OPTIONS:       u32 = SHT_LOPROC + 0x0D;
+pub const SHT_MIPS_SHDR:          u32 = SHT_LOPROC + 0x10;
+pub const SHT_MIPS_FDESC:         u32 = SHT_LOPROC + 0x11;
+pub const SHT_MIPS_EXTSYM:        u32 = SHT_LOPROC + 0x12;
+pub const SHT_MIPS_DENSE:         u32 = SHT_LOPROC + 0x13;
+pub const SHT_MIPS_PDESC:         u32 = SHT_LOPROC + 0x14;
+pub const SHT_MIPS_LOCSYM:        u32 = SHT_LOPROC + 0x15;
+pub const SHT_MIPS_AUXSYM:        u32 = SHT_LOPROC + 0x16;
+pub const SHT_MIPS_OPTSYM:        u32 = SHT_LOPROC + 0x17;
+pub const SHT_MIPS_LOCSTR:        u32 = SHT_LOPROC + 0x18;
+pub const SHT_MIPS_LINE:          u32 = SHT_LOPROC + 0x19;
+pub const SHT_MIPS_RFDESC:        u32 = SHT_LOPROC + 0x1A;
+pub const SHT_MIPS_DELTASYM:      u32 = SHT_LOPROC + 0x1B;
+pub const SHT_MIPS_DELTAINST:     u32 = SHT_LOPROC + 0x1C;
+pub const SHT_MIPS_DELTACLASS:    u32 = SHT_LOPROC + 0x1D;
+pub const SHT_MIPS_DWARF:         u32 = SHT_LOPROC + 0x1E;
+pub const SHT_MIPS_DELTADECL:     u32 = SHT_LOPROC + 0x1F;
+pub const SHT_MIPS_SYMBOL_LIB:    u32 = SHT_LOPROC + 0x20;
+pub const SHT_MIPS_EVENTS:        u32 = SHT_LOPROC + 0x21;
+pub const SHT_MIPS_TRANSLATE:     u32 = SHT_LOPROC + 0x22;
+pub const SHT_MIPS_PIXIE:         u32 = SHT_LOPROC + 0x23;
+pub const SHT_MIPS_XLATE:         u32 = SHT_LOPROC + 0x24;
+pub const SHT_MIPS_XLATE_DEBUG:   u32 = SHT_LOPROC + 0x25;
+pub const SHT_MIPS_WHIRL:         u32 = SHT_LOPROC + 0x26;
+pub const SHT_MIPS_EH_REGION:     u32 = SHT_LOPROC + 0x27;
+pub const SHT_MIPS_XLATE_OLD:     u32 = SHT_LOPROC + 0x28;
+pub const SHT_MIPS_PDR_EXCEPTION: u32 = SHT_LOPROC + 0x29;
+pub const SHT_MIPS_ABIFLAGS:      u32 = SHT_LOPROC + 0x2A;
+
+pub const SHT_IA_64_EXT:           u32 = SHT_LOPROC + 0;
+pub const SHT_IA_64_UNWIND:        u32 = SHT_LOPROC + 1;
+pub const SHT_IA_64_LOSPREG:       u32 = SHT_LOPROC + 0x8000000;
+pub const SHT_IA_64_HISPREG:       u32 = SHT_LOPROC + 0x8FFFFFF;
+pub const SHT_IA_64_PRIORITY_INIT: u32 = SHT_LOPROC + 0x9000000;
+
+pub const SHT_PARISC_EXT:     u32 = SHT_LOPROC + 0;
+pub const SHT_PARISC_UNWIND:  u32 = SHT_LOPROC + 1;
+pub const SHT_PARISC_DOC:     u32 = SHT_LOPROC + 2;
+pub const SHT_PARISC_ANNOT:   u32 = SHT_LOPROC + 3;
+pub const SHT_PARISC_DLKM:    u32 = SHT_LOPROC + 4;
+pub const SHT_PARISC_SYMEXTN: u32 = SHT_LOPROC + 8;
+pub const SHT_PARISC_STUBS:   u32 = SHT_LOPROC + 9;
+
+pub const SHT_X86_64_UNWIND: u32 = SHT_LOPROC + 1;
+
 pub const SHF_WRITE:     u64 = 0x00000001;
 pub const SHF_ALLOC:     u64 = 0x00000002;
 pub const SHF_EXECINSTR: u64 = 0x00000004;
@@ -489,8 +557,8 @@ pub struct ElfShdr {
 }
 
 impl ElfShdr {
-	pub fn type_string(&self) -> String {
-		shdr_type_string(self.sh_type)
+	pub fn type_string(&self, e_machine: u16) -> String {
+		shdr_type_string(self.sh_type, e_machine)
 	}
 }
 
@@ -1305,37 +1373,99 @@ pub fn sym_visibility_string(stt_visibility: u8) -> String {
 	}.to_string()
 }
 
-pub fn shdr_type_string(sh_type: u32) -> String {
-	match sh_type {
-		SHT_NULL          => "NULL",
-		SHT_PROGBITS      => "PROGBITS",
-		SHT_SYMTAB        => "SYMTAB",
-		SHT_STRTAB        => "STRTAB",
-		SHT_RELA          => "RELA",
-		SHT_HASH          => "HASH",
-		SHT_DYNAMIC       => "DYNAMIC",
-		SHT_NOTE          => "NOTE",
-		SHT_NOBITS        => "NOBITS",
-		SHT_REL           => "REL",
-		SHT_SHLIB         => "SHLIB",
-		SHT_DYNSYM        => "DYNSYM",
-		SHT_INIT_ARRAY    => "INIT_ARRAY",
-		SHT_FINI_ARRAY    => "FINI_ARRAY",
-		SHT_PREINIT_ARRAY => "PREINIT_ARRAY",
-		SHT_GROUP         => "GROUP",
-		SHT_SYMTAB_SHNDX  => "SYMTAB_SHNDX",
+pub fn shdr_type_string(sh_type: u32, e_machine: u16) -> String {
+	match (sh_type, e_machine) {
+		(SHT_NULL,          _) => "NULL",
+		(SHT_PROGBITS,      _) => "PROGBITS",
+		(SHT_SYMTAB,        _) => "SYMTAB",
+		(SHT_STRTAB,        _) => "STRTAB",
+		(SHT_RELA,          _) => "RELA",
+		(SHT_HASH,          _) => "HASH",
+		(SHT_DYNAMIC,       _) => "DYNAMIC",
+		(SHT_NOTE,          _) => "NOTE",
+		(SHT_NOBITS,        _) => "NOBITS",
+		(SHT_REL,           _) => "REL",
+		(SHT_SHLIB,         _) => "SHLIB",
+		(SHT_DYNSYM,        _) => "DYNSYM",
+		(SHT_INIT_ARRAY,    _) => "INIT_ARRAY",
+		(SHT_FINI_ARRAY,    _) => "FINI_ARRAY",
+		(SHT_PREINIT_ARRAY, _) => "PREINIT_ARRAY",
+		(SHT_GROUP,         _) => "GROUP",
+		(SHT_SYMTAB_SHNDX,  _) => "SYMTAB SECTION INDICIES",
+		(SHT_GNU_VERDEF,    _) => "VERDEF",
+		(SHT_GNU_VERNEED,   _) => "VERNEED",
+		(SHT_GNU_VERSYM,    _) => "VERSYM",
+		(0x6FFFFFF0,        _) => "VERSYM",
+		(0x6FFFFFFC,        _) => "VERDEF",
+		(0x7FFFFFFD,        _) => "AUXILIARY",
+		(0x7FFFFFFF,        _) => "FILTER",
+		(SHT_GNU_LIBLIST,   _) => "GNU_LIBLIST",
 
-		SHT_LOUSER ... SHT_HIUSER => {
-			return format!("LOUSER+{:x}", sh_type - SHT_LOUSER);
-		},
+		(SHT_ARM_EXIDX,          EM_ARM) => "ARM_EXIDX",
+		(SHT_ARM_PREEMPTMAP,     EM_ARM) => "ARM_PREEMPTMAP",
+		(SHT_ARM_ATTRIBUTES,     EM_ARM) => "ARM_ATTRIBUTES",
+		(SHT_ARM_DEBUGOVERLAY,   EM_ARM) => "ARM_DEBUGOVERLAY",
+		(SHT_ARM_OVERLAYSECTION, EM_ARM) => "ARM_OVERLAYSECTION",
 
-		SHT_LOPROC ... SHT_HIPROC => {
-			return format!("LOPROC+{:x}", sh_type - SHT_LOPROC);
-		},
+		(SHT_IA_64_EXT,           EM_IA_64) => "IA_64_EXT",
+		(SHT_IA_64_UNWIND,        EM_IA_64) => "IA_64_UNWIND",
+		(SHT_IA_64_PRIORITY_INIT, EM_IA_64) => "IA_64_PRIORITY_INIT",
 
-		_ => {
-			return format!("LOOS+{:x}", sh_type - SHT_LOOS);
-		},
+		(SHT_MIPS_LIBLIST,       EM_MIPS) | (SHT_MIPS_LIBLIST,       EM_MIPS_RS3_LE) => "MIPS_LIBLIST",
+		(SHT_MIPS_MSYM,          EM_MIPS) | (SHT_MIPS_MSYM,          EM_MIPS_RS3_LE) => "MIPS_MSYM",
+		(SHT_MIPS_CONFLICT,      EM_MIPS) | (SHT_MIPS_CONFLICT,      EM_MIPS_RS3_LE) => "MIPS_CONFLICT",
+		(SHT_MIPS_GPTAB,         EM_MIPS) | (SHT_MIPS_GPTAB,         EM_MIPS_RS3_LE) => "MIPS_GPTAB",
+		(SHT_MIPS_UCODE,         EM_MIPS) | (SHT_MIPS_UCODE,         EM_MIPS_RS3_LE) => "MIPS_UCODE",
+		(SHT_MIPS_DEBUG,         EM_MIPS) | (SHT_MIPS_DEBUG,         EM_MIPS_RS3_LE) => "MIPS_DEBUG",
+		(SHT_MIPS_REGINFO,       EM_MIPS) | (SHT_MIPS_REGINFO,       EM_MIPS_RS3_LE) => "MIPS_REGINFO",
+		(SHT_MIPS_PACKAGE,       EM_MIPS) | (SHT_MIPS_PACKAGE,       EM_MIPS_RS3_LE) => "MIPS_PACKAGE",
+		(SHT_MIPS_PACKSYM,       EM_MIPS) | (SHT_MIPS_PACKSYM,       EM_MIPS_RS3_LE) => "MIPS_PACKSYM",
+		(SHT_MIPS_RELD,          EM_MIPS) | (SHT_MIPS_RELD,          EM_MIPS_RS3_LE) => "MIPS_RELD",
+		(SHT_MIPS_IFACE,         EM_MIPS) | (SHT_MIPS_IFACE,         EM_MIPS_RS3_LE) => "MIPS_IFACE",
+		(SHT_MIPS_CONTENT,       EM_MIPS) | (SHT_MIPS_CONTENT,       EM_MIPS_RS3_LE) => "MIPS_CONTENT",
+		(SHT_MIPS_OPTIONS,       EM_MIPS) | (SHT_MIPS_OPTIONS,       EM_MIPS_RS3_LE) => "MIPS_OPTIONS",
+		(SHT_MIPS_SHDR,          EM_MIPS) | (SHT_MIPS_SHDR,          EM_MIPS_RS3_LE) => "MIPS_SHDR",
+		(SHT_MIPS_FDESC,         EM_MIPS) | (SHT_MIPS_FDESC,         EM_MIPS_RS3_LE) => "MIPS_FDESC",
+		(SHT_MIPS_EXTSYM,        EM_MIPS) | (SHT_MIPS_EXTSYM,        EM_MIPS_RS3_LE) => "MIPS_EXTSYM",
+		(SHT_MIPS_DENSE,         EM_MIPS) | (SHT_MIPS_DENSE,         EM_MIPS_RS3_LE) => "MIPS_DENSE",
+		(SHT_MIPS_PDESC,         EM_MIPS) | (SHT_MIPS_PDESC,         EM_MIPS_RS3_LE) => "MIPS_PDESC",
+		(SHT_MIPS_LOCSYM,        EM_MIPS) | (SHT_MIPS_LOCSYM,        EM_MIPS_RS3_LE) => "MIPS_LOCSYM",
+		(SHT_MIPS_AUXSYM,        EM_MIPS) | (SHT_MIPS_AUXSYM,        EM_MIPS_RS3_LE) => "MIPS_AUXSYM",
+		(SHT_MIPS_OPTSYM,        EM_MIPS) | (SHT_MIPS_OPTSYM,        EM_MIPS_RS3_LE) => "MIPS_OPTSYM",
+		(SHT_MIPS_LOCSTR,        EM_MIPS) | (SHT_MIPS_LOCSTR,        EM_MIPS_RS3_LE) => "MIPS_LOCSTR",
+		(SHT_MIPS_LINE,          EM_MIPS) | (SHT_MIPS_LINE,          EM_MIPS_RS3_LE) => "MIPS_LINE",
+		(SHT_MIPS_RFDESC,        EM_MIPS) | (SHT_MIPS_RFDESC,        EM_MIPS_RS3_LE) => "MIPS_RFDESC",
+		(SHT_MIPS_DELTASYM,      EM_MIPS) | (SHT_MIPS_DELTASYM,      EM_MIPS_RS3_LE) => "MIPS_DELTASYM",
+		(SHT_MIPS_DELTAINST,     EM_MIPS) | (SHT_MIPS_DELTAINST,     EM_MIPS_RS3_LE) => "MIPS_DELTAINST",
+		(SHT_MIPS_DELTACLASS,    EM_MIPS) | (SHT_MIPS_DELTACLASS,    EM_MIPS_RS3_LE) => "MIPS_DELTACLASS",
+		(SHT_MIPS_DWARF,         EM_MIPS) | (SHT_MIPS_DWARF,         EM_MIPS_RS3_LE) => "MIPS_DWARF",
+		(SHT_MIPS_DELTADECL,     EM_MIPS) | (SHT_MIPS_DELTADECL,     EM_MIPS_RS3_LE) => "MIPS_DELATEDECL",
+		(SHT_MIPS_SYMBOL_LIB,    EM_MIPS) | (SHT_MIPS_SYMBOL_LIB,    EM_MIPS_RS3_LE) => "MIPS_SYMBOL_LIB",
+		(SHT_MIPS_EVENTS,        EM_MIPS) | (SHT_MIPS_EVENTS,        EM_MIPS_RS3_LE) => "MIPS_EVENTS",
+		(SHT_MIPS_TRANSLATE,     EM_MIPS) | (SHT_MIPS_TRANSLATE,     EM_MIPS_RS3_LE) => "MIPS_TRANSLATE",
+		(SHT_MIPS_PIXIE,         EM_MIPS) | (SHT_MIPS_PIXIE,         EM_MIPS_RS3_LE) => "MIPS_PIXIE",
+		(SHT_MIPS_XLATE,         EM_MIPS) | (SHT_MIPS_XLATE,         EM_MIPS_RS3_LE) => "MIPS_XLATE",
+		(SHT_MIPS_XLATE_DEBUG,   EM_MIPS) | (SHT_MIPS_XLATE_DEBUG,   EM_MIPS_RS3_LE) => "MIPS_XLATE_DEBUG",
+		(SHT_MIPS_WHIRL,         EM_MIPS) | (SHT_MIPS_WHIRL,         EM_MIPS_RS3_LE) => "MIPS_WHIRL",
+		(SHT_MIPS_EH_REGION,     EM_MIPS) | (SHT_MIPS_EH_REGION,     EM_MIPS_RS3_LE) => "MIPS_EH_REGION",
+		(SHT_MIPS_XLATE_OLD,     EM_MIPS) | (SHT_MIPS_XLATE_OLD,     EM_MIPS_RS3_LE) => "MIPS_XLATE_OLD",
+		(SHT_MIPS_PDR_EXCEPTION, EM_MIPS) | (SHT_MIPS_PDR_EXCEPTION, EM_MIPS_RS3_LE) => "MIPS_PDR_EXCEPTION",
+		(SHT_MIPS_ABIFLAGS,      EM_MIPS) | (SHT_MIPS_ABIFLAGS,      EM_MIPS_RS3_LE) => "MIPS_ABIFLAGS",
+
+		(SHT_PARISC_EXT,     EM_PARISC) => "PARISC_EXT",
+		(SHT_PARISC_UNWIND,  EM_PARISC) => "PARISC_UNWIND",
+		(SHT_PARISC_DOC,     EM_PARISC) => "PARISC_DOC",
+		(SHT_PARISC_ANNOT,   EM_PARISC) => "PARISC_ANNOT",
+		(SHT_PARISC_SYMEXTN, EM_PARISC) => "PARISC_SYMEXTN",
+		(SHT_PARISC_STUBS,   EM_PARISC) => "PARISC_STUBS",
+		(SHT_PARISC_DLKM,    EM_PARISC) => "PARISC_DLKM",
+
+		(SHT_X86_64_UNWIND, EM_X86_64) => "X86_64_UNWIND",
+
+		(SHT_LOUSER ... SHT_HIUSER, _) => return format!("LOUSER+{:x}", sh_type - SHT_LOUSER),
+		(SHT_LOPROC ... SHT_HIPROC, _) => return format!("LOPROC+{:x}", sh_type - SHT_LOPROC),
+		(SHT_LOOS   ... SHT_HIOS,   _) => return format!("LOOS+{:x}", sh_type - SHT_LOOS),
+		(_, _)                         => return format!("<unknown>: {:x}", sh_type),
 	}.to_string()
 }
 
