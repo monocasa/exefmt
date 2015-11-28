@@ -992,6 +992,7 @@ impl Loader for ElfLoader {
 
 		let machine = match self.elf.e_machine {
 			EM_PPC | EM_PPC64 | EM_PPC_OLD => "powerpc".to_string(),
+			EM_MIPS => "tradbigmips".to_string(),
 			_   => format!("unknown_machine_{:#x}", self.elf.e_machine),
 		};
 
