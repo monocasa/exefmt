@@ -1,5 +1,3 @@
-#![feature(convert)]
-
 pub mod elf;
 pub mod binary;
 
