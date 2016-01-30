@@ -990,10 +990,13 @@ impl Loader for ElfLoader {
 			_          => "elfunknownclass".to_string(),
 		};
 
-		let machine = match self.elf.e_machine {
-			EM_PPC | EM_PPC64 | EM_PPC_OLD => "powerpc".to_string(),
-			EM_MIPS => "tradbigmips".to_string(),
-			_   => format!("unknown_machine_{:#x}", self.elf.e_machine),
+		let machine = match (self.elf.e_machine, self.elf.e_ident[EI_DATA]) {
+			(EM_PPC, _) | (EM_PPC64, _) | (EM_PPC_OLD, _) => "powerpc".to_string(),
+
+			(EM_MIPS, ELFDATA2MSB) => "tradbigmips".to_string(),
+			(EM_MIPS, ELFDATA2LSB) => "tradlittlemips".to_string(),
+
+			(_, _)  => format!("unknown_machine_{:#x}", self.elf.e_machine),
 		};
 
 		fmt + "-" + machine.as_ref()
