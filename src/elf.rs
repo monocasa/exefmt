@@ -4,7 +4,7 @@ use std::io;
 
 use self::byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
-use super::{Loader, SeekReadStream, Segment};
+use super::{Endianness, Loader, SeekReadStream, Segment};
 
 pub const EI_MAG0: usize = 0;
 pub const ELFMAG0: u8 = 0x7F;
@@ -997,6 +997,14 @@ impl Loader for ElfLoader {
 		};
 
 		fmt + "-" + machine.as_ref()
+	}
+
+	fn endianness(&self) -> Option<Endianness> {
+		match self.elf.e_ident[EI_DATA] {
+			ELFDATA2MSB => Some(Endianness::Big),
+			ELFDATA2LSB => Some(Endianness::Little),
+			_           => None,
+		}
 	}
 }
 

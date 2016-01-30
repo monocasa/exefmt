@@ -1,11 +1,12 @@
 use std::fs;
 use std::io;
 
-use super::{Loader, SeekReadStream, Segment};
+use super::{Endianness, Loader, SeekReadStream, Segment};
 
 pub struct BinLoader {
 	pub segments: Vec<Segment>,
 	pub entry: Option<u64>,
+	pub endianness: Option<Endianness>
 }
 
 impl BinLoader {
@@ -13,6 +14,7 @@ impl BinLoader {
 		let mut bin_ldr = BinLoader {
 			segments: Vec::<Segment>::new(),
 			entry: None,
+			endianness: None,
 		};
 
 		let meta = try!(file.metadata());
@@ -54,6 +56,10 @@ impl Loader for BinLoader {
 
 	fn fmt_str(&self) -> String {
 		"binary".to_string()
+	}
+
+	fn endianness(&self) -> Option<Endianness> {
+		self.endianness.clone()
 	}
 }
 
