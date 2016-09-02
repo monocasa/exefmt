@@ -7,10 +7,6 @@ authors = ["monocasa"]
 name="exefmt"
 path = "src/lib.rs"
 
-[[bin]]
-name = "nm"
-path = "src/nm.rs"
-
 [dependencies]
 byteorder = "0.3.13"
 
