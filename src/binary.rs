@@ -54,6 +54,10 @@ impl Loader for BinLoader {
 		Ok(ret)
 	}
 
+	fn get_segment_metadata(&self) -> Result<Vec<Segment>, io::Error> {
+		Ok(self.segments.clone())
+	}
+
 	fn fmt_str(&self) -> String {
 		"binary".to_string()
 	}

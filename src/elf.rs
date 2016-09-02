@@ -983,6 +983,32 @@ impl Loader for ElfLoader {
 		Ok(ret_vec)
 	}
 
+	fn get_segment_metadata(&self,) -> Result<Vec<Segment>, io::Error> {
+		let mut ret_vec: Vec<Segment> = Vec::new();
+
+		if self.load_from == ElfLoadFrom::ProgramHeaders {
+			let mut cur_seg_num: u16 = 0;
+			for phdr in self.elf.phdrs.iter() {
+				ret_vec.push(Segment {
+					name: format!("phdr[{}]", cur_seg_num),
+					load_base: phdr.p_paddr,
+					stream_base: phdr.p_offset,
+					file_size: phdr.p_filesz,
+					mem_size: phdr.p_memsz,
+					read_only: !((phdr.p_flags & PF_W) != 0),
+					executable: (phdr.p_flags & PF_X) != 0,
+					present_when_loaded: (phdr.p_type == PT_LOAD),
+				});
+
+				cur_seg_num += 1;
+			}
+		} else {
+			return Err(io::Error::new(io::ErrorKind::Other, "get_segment_metadata from SectionHeader unimplemented"));
+		}
+
+		Ok(ret_vec)
+	}
+
 	fn fmt_str(&self) -> String {
 		let fmt = match self.elf.e_ident[EI_CLASS] {
 			ELFCLASS32 => "elf32".to_string(),
