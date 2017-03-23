@@ -163,6 +163,8 @@ pub const EM_CRX:          u16 = 114;
 
 pub const EM_SCORE:        u16 = 135;
 
+pub const EM_AARCH64:      u16 = 183;
+
 pub const EM_CYGNUS_ARC:     u16 = 0x9040;
 pub const EM_CYGNUS_D10V:    u16 = 0x7650;
 pub const EM_CYGNUS_D30V:    u16 = 0x7676;
@@ -1121,6 +1123,7 @@ pub fn ehdr_machine_string(e_machine: u16) -> String {
 		EM_68K         => "MC68000",
 		EM_88K         => "MC88000",
 		EM_960         => "Intel 90860",
+		EM_AARCH64     => "AArch64",
 		EM_ALPHA       => "Alpha",
 		EM_ARC         => "ARC",
 		EM_ARM         => "ARM",
